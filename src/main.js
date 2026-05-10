@@ -275,11 +275,8 @@ function newGame() {
   closeModal('mode-modal');
   closeModal('daily-modal');
   closeModal('stages-modal');
-  if (mode === 'classic') {
-    persistSave();
-  } else {
-    storage.remove(KEYS.save);
-  }
+  storage.remove(KEYS.save);
+  persistSave();
   analytics.track('game_start', { mode, ...modeOpts });
 }
 
@@ -292,7 +289,7 @@ function handlePlace(slotIdx, r, c) {
   refreshAll();
   audio.play('place');
   haptics.vibrate(haptics.PATTERNS.place);
-  if (mode === 'classic') persistSave();
+  persistSave();
 }
 
 function handleUndo() {
@@ -301,7 +298,7 @@ function handleUndo() {
   if (!result.ok) return;
   refreshAll();
   audio.play('place');
-  if (mode === 'classic') persistSave();
+  persistSave();
 }
 
 function handleHint() {
@@ -313,18 +310,67 @@ function handleHint() {
 }
 
 function persistSave() {
-  if (!game || game.over || mode !== 'classic') {
+  if (!game || game.over) {
     storage.remove(KEYS.save);
     return;
   }
   storage.set(KEYS.save, {
-    score: game.score,
-    cells: Array.from(game.board.cells),
-    occupancy: game.board.occupancy.toString(),
-    tray: game.tray.map((p) => p.id),
-    traySlotsUsed: game.traySlotsUsed,
+    mode,
+    modeOpts,
     seed: game.seed,
+    placements: game.replay.placements.map((p) => ({ pieceId: p.pieceId, r: p.r, c: p.c })),
+    timeLeft: game.timeLeft ?? null,
+    undosLeft: game.undosLeft,
+    hintsLeft: game.hintsLeft,
+    everFullClear,
   });
+}
+
+function restoreSave() {
+  const save = storage.get(KEYS.save, null);
+  if (!save || !save.placements) return null;
+
+  if (save.mode === 'daily' && save.modeOpts?.key !== dateKey(new Date())) {
+    storage.remove(KEYS.save);
+    return null;
+  }
+
+  let g;
+  try {
+    if (save.mode === 'classic') g = startClassic({ seed: save.seed });
+    else if (save.mode === 'daily') g = startDaily({ ...save.modeOpts });
+    else if (save.mode === 'timeAttack') g = startTimeAttack({ seed: save.seed });
+    else if (save.mode === 'stages') g = startStage(save.modeOpts.levelId, { seed: save.seed });
+    else return null;
+  } catch {
+    return null;
+  }
+  if (!g || g.over) return null;
+
+  g.isReplaying = true;
+  for (const p of save.placements) {
+    if (g.over) break;
+    const slotIdx = g.tray.findIndex((piece, idx) => piece && !g.traySlotsUsed[idx] && piece.id === p.pieceId);
+    if (slotIdx === -1) {
+      g.isReplaying = false;
+      return null;
+    }
+    const result = placePiece(g, slotIdx, p.r, p.c);
+    if (!result.ok) {
+      g.isReplaying = false;
+      return null;
+    }
+  }
+  g.isReplaying = false;
+
+  if (typeof save.undosLeft === 'number') g.undosLeft = save.undosLeft;
+  if (typeof save.hintsLeft === 'number') g.hintsLeft = save.hintsLeft;
+  if (save.mode === 'timeAttack' && typeof save.timeLeft === 'number') g.timeLeft = save.timeLeft;
+
+  mode = save.mode;
+  modeOpts = save.modeOpts ?? {};
+  if (save.everFullClear) everFullClear = true;
+  return g;
 }
 
 function syncSettingsToUi() {
@@ -905,25 +951,48 @@ function bindUi() {
 
 function bindGameEvents() {
   on('linesCleared', ({ rows, cols, combo, gained, emptyAfter }) => {
+    if (emptyAfter) everFullClear = true;
+    if (game?.isReplaying) return;
     flashLines(rows, cols);
     audio.play(combo >= 2 ? 'combo' : 'clear');
     haptics.vibrate(combo >= 2 ? haptics.PATTERNS.combo : haptics.PATTERNS.clear);
     const board = document.getElementById('board');
     const rect = board.getBoundingClientRect();
-    scorePopup(`+${gained}`, rect.left + rect.width / 2, rect.top + rect.height / 2, 'clear');
+    const popupAt = popupPositionFor(rect, rows, cols);
+    scorePopup(`+${gained}`, popupAt.x, popupAt.y, 'clear');
     if (combo >= 2) comboBubble(combo, board);
-    if (emptyAfter) {
-      fullClearBanner(board);
-      everFullClear = true;
-    }
+    if (emptyAfter) fullClearBanner(board);
     analytics.track('lines_cleared', { mode, rows: rows.length, cols: cols.length, combo, gained });
+    evaluateAchievements();
   });
 
-  on('trayRefilled', () => updateActionsUi());
+  on('trayRefilled', () => {
+    if (game?.isReplaying) return;
+    updateActionsUi();
+  });
   on('undone', () => updateActionsUi());
   on('hintUsed', () => updateActionsUi());
 
-  on('gameOver', (payload) => showGameOver(payload));
+  on('gameOver', (payload) => {
+    if (game?.isReplaying) return;
+    showGameOver(payload);
+  });
+}
+
+function popupPositionFor(boardRect, rows, cols) {
+  const cellSize = boardRect.width / 8;
+  if (rows.length > 0 && cols.length > 0) {
+    return { x: boardRect.left + boardRect.width / 2, y: boardRect.top + boardRect.height / 2 };
+  }
+  if (rows.length > 0) {
+    const r = rows[Math.floor(rows.length / 2)];
+    return { x: boardRect.left + boardRect.width / 2, y: boardRect.top + (r + 0.5) * cellSize };
+  }
+  if (cols.length > 0) {
+    const c = cols[Math.floor(cols.length / 2)];
+    return { x: boardRect.left + (c + 0.5) * cellSize, y: boardRect.top + boardRect.height / 2 };
+  }
+  return { x: boardRect.left + boardRect.width / 2, y: boardRect.top + boardRect.height / 2 };
 }
 
 function maybeShowTutorial() {
@@ -941,8 +1010,17 @@ function maybeShowDailyCheckin() {
   }, 1200);
 }
 
+function preventGestures() {
+  // touch-action: manipulation on body kills pinch + double-tap zoom on
+  // standards-compliant browsers; gesturestart is the iOS Safari fallback.
+  ['gesturestart', 'gesturechange', 'gestureend'].forEach((evt) => {
+    document.addEventListener(evt, (e) => e.preventDefault(), { passive: false });
+  });
+}
+
 function bootstrap() {
   errors.install();
+  preventGestures();
   storage.runMigrations();
   loadBest();
   loadSettings();
@@ -958,9 +1036,17 @@ function bootstrap() {
   attachTrayDrag({ getGame: () => game, onPlace: handlePlace });
   i18n.onChange(() => i18n.applyDom());
 
-  mode = 'classic';
-  modeOpts = {};
-  newGame();
+  const restored = restoreSave();
+  if (restored) {
+    game = restored;
+    gameStartTs = performance.now();
+    refreshAll();
+    if (mode === 'timeAttack' && !game.over) startTimer();
+  } else {
+    mode = 'classic';
+    modeOpts = {};
+    newGame();
+  }
   evaluateAchievements();
   maybeShowTutorial();
   maybeShowDailyCheckin();

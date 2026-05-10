@@ -97,7 +97,17 @@
   --color-text: #e6dccb;
 }
 
-/* ---------- Color-blind: add per-tier patterns ---------- */
+/* ---------- Block shapes (orthogonal to theme) ---------- */
+:root[data-shape="sharp"] .cell.filled,
+:root[data-shape="sharp"] .piece-cell.filled,
+:root[data-shape="sharp"] .stage-cell {
+  border-radius: 2px;
+}
+:root[data-shape="pill"] .cell.filled,
+:root[data-shape="pill"] .piece-cell.filled {
+  border-radius: 50%;
+}
+
 :root[data-colorblind="true"] .cell.filled,
 :root[data-colorblind="true"] .piece-cell.filled {
   position: relative;

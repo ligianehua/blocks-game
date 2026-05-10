@@ -21,6 +21,14 @@ export function applyColorblind(enabled) {
   else delete document.documentElement.dataset.colorblind;
 }
 
+export const SHAPES = ['rounded', 'sharp', 'pill'];
+
+export function applyShape(shape) {
+  if (!SHAPES.includes(shape)) shape = 'rounded';
+  if (shape === 'rounded') delete document.documentElement.dataset.shape;
+  else document.documentElement.dataset.shape = shape;
+}
+
 export function isKnownTheme(id) {
   return THEMES.some((t) => t.id === id);
 }

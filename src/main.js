@@ -10,6 +10,9 @@ import { startStage, LEVELS, getLevel, rateStars } from './game/modes/stages.js'
 import { placePiece, undoLast, useHint, tickTime } from './game/state.js';
 import { nextMilestone, progressToNext } from './game/score.js';
 import { emptyStats, recordGameOver, formatDuration } from './game/stats.js';
+import { ACHIEVEMENTS, evaluate as evalAchievements, getById as getAchievement } from './game/achievements.js';
+import { emptyCheckin, checkInToday, computeReward, dayKey } from './game/checkin.js';
+import { emptyBoard as emptyLb, recordScore as recordLbScore } from './game/leaderboard.js';
 import {
   initBoard,
   initTray,
@@ -25,12 +28,15 @@ import { scorePopup, comboBubble, fullClearBanner } from './ui/animations.js';
 import * as tutorial from './ui/tutorial.js';
 import {
   THEMES,
+  SHAPES,
   applyTheme,
   applyDark,
   applyColorblind,
+  applyShape,
   isUnlocked,
   isKnownTheme,
 } from './ui/theme.js';
+import * as toast from './ui/toast.js';
 import { renderCard, shareOrDownload } from './ui/share.js';
 import * as storage from './platform/web/storage.js';
 import * as audio from './platform/web/audio.js';
@@ -38,6 +44,7 @@ import * as haptics from './platform/web/haptics.js';
 import * as i18n from './platform/web/i18n.js';
 import * as analytics from './platform/web/analytics.js';
 import * as errors from './platform/web/errors.js';
+import * as monetize from './platform/web/monetize.js';
 
 const KEYS = {
   best: 'bg.highScore',
@@ -48,6 +55,9 @@ const KEYS = {
   save: 'bg.save',
   tutorialDone: 'bg.tutorialDone',
   stats: 'bg.stats',
+  achievements: 'bg.achievements',
+  checkin: 'bg.checkin',
+  leaderboard: 'bg.leaderboard',
 };
 
 let game = null;
@@ -57,6 +67,12 @@ let modeOpts = {};
 let bestScore = 0;
 let timeAttackBest = 0;
 let stats = emptyStats();
+let achievements = [];
+let checkin = emptyCheckin();
+let leaderboard = emptyLb();
+let everFullClear = false;
+let pendingExtras = { undos: 0, hints: 0 };
+let lbActiveTab = 'classic';
 let timer = null;
 let timerStart = 0;
 let settings = {
@@ -67,6 +83,7 @@ let settings = {
   theme: 'wood',
   dark: false,
   colorblind: false,
+  shape: 'rounded',
 };
 
 let lastResult = null;
@@ -79,8 +96,53 @@ function loadSettings() {
   haptics.setEnabled(settings.haptics);
   applyDark(!!settings.dark);
   applyColorblind(!!settings.colorblind);
+  if (!SHAPES.includes(settings.shape)) settings.shape = 'rounded';
+  applyShape(settings.shape);
   if (!isUnlocked(settings.theme, bestScore)) settings.theme = 'wood';
   applyTheme(settings.theme);
+}
+
+function loadAchievements() {
+  achievements = storage.get(KEYS.achievements, []);
+}
+function saveAchievements() {
+  storage.set(KEYS.achievements, achievements);
+}
+
+function loadCheckin() {
+  checkin = storage.get(KEYS.checkin, null) ?? emptyCheckin();
+}
+function saveCheckin() {
+  storage.set(KEYS.checkin, checkin);
+}
+
+function loadLeaderboard() {
+  leaderboard = { ...emptyLb(), ...(storage.get(KEYS.leaderboard, null) ?? {}) };
+}
+function saveLeaderboard() {
+  storage.set(KEYS.leaderboard, leaderboard);
+}
+
+function buildWorld() {
+  const completedCount = LEVELS.filter((l) => storage.get(`${KEYS.stages}.${l.id}`, null)?.stars > 0).length;
+  const totalStars = LEVELS.reduce((sum, l) => sum + (storage.get(`${KEYS.stages}.${l.id}`, null)?.stars ?? 0), 0);
+  return {
+    stats,
+    flags: { everFullClear },
+    stages: { completedCount, totalStars },
+    checkin,
+  };
+}
+
+function evaluateAchievements() {
+  const { ids, newlyUnlocked } = evalAchievements(achievements, buildWorld());
+  if (newlyUnlocked.length > 0) {
+    achievements = ids;
+    saveAchievements();
+    for (const ach of newlyUnlocked) {
+      toast.show(i18n.t('toast.achievement', { title: i18n.t(`ach.${ach.id}.title`) }), { icon: ach.icon });
+    }
+  }
 }
 
 function loadStats() {
@@ -199,6 +261,13 @@ function newGame() {
   } else if (mode === 'stages') {
     game = startStage(modeOpts.levelId);
   }
+  if (game && pendingExtras.undos > 0) {
+    game.undosLeft += pendingExtras.undos;
+  }
+  if (game && pendingExtras.hints > 0) {
+    game.hintsLeft += pendingExtras.hints;
+  }
+  pendingExtras = { undos: 0, hints: 0 };
   gameStartTs = performance.now();
   refreshAll();
   closeModal('gameover-modal');
@@ -265,6 +334,7 @@ function syncSettingsToUi() {
   document.getElementById('toggle-dark').checked = !!settings.dark;
   document.getElementById('toggle-colorblind').checked = !!settings.colorblind;
   document.getElementById('select-language').value = i18n.getLocale();
+  document.getElementById('select-shape').value = settings.shape ?? 'rounded';
   renderThemePicker();
 }
 
@@ -435,9 +505,37 @@ function showGameOver({ score, won }) {
     dateStr: new Date().toLocaleDateString(),
   };
 
+  leaderboard = recordLbScore(leaderboard, mode, score, { mode, won });
+  saveLeaderboard();
+
+  evaluateAchievements();
+
+  monetize.revive().then((available) => {
+    const btn = document.getElementById('btn-revive');
+    if (!btn) return;
+    btn.hidden = !available;
+    btn.disabled = !available;
+  });
+
   if (mode === 'classic') storage.remove(KEYS.save);
   openModal('gameover-modal');
   analytics.track('game_over', { mode, score, won });
+}
+
+async function handleRevive() {
+  const ok = await monetize.revive();
+  if (!ok) {
+    toast.show(i18n.t('gameover.reviveUnavailable'));
+    return;
+  }
+  if (!game) return;
+  game.over = false;
+  game.undosLeft = Math.max(game.undosLeft, 1);
+  if (game.history.length > 0) {
+    undoLast(game);
+  }
+  closeModal('gameover-modal');
+  refreshAll();
 }
 
 function modeLabel() {
@@ -452,6 +550,131 @@ async function handleShare() {
   if (!lastResult) return;
   const canvas = renderCard(lastResult);
   await shareOrDownload(canvas);
+}
+
+function renderAchievementsModal() {
+  const list = document.getElementById('ach-list');
+  const progress = document.getElementById('ach-progress');
+  if (!list || !progress) return;
+  const set = new Set(achievements);
+  progress.textContent = i18n.t('ach.progress', { done: set.size, total: ACHIEVEMENTS.length });
+  list.innerHTML = '';
+  for (const ach of ACHIEVEMENTS) {
+    const unlocked = set.has(ach.id);
+    const row = document.createElement('div');
+    row.className = `ach-row${unlocked ? '' : ' locked'}`;
+    const icon = document.createElement('div');
+    icon.className = 'ach-icon';
+    icon.textContent = unlocked ? ach.icon : '🔒';
+    row.appendChild(icon);
+    const text = document.createElement('div');
+    text.className = 'ach-text';
+    const title = document.createElement('strong');
+    title.textContent = i18n.t(`ach.${ach.id}.title`);
+    const desc = document.createElement('small');
+    desc.textContent = i18n.t(`ach.${ach.id}.desc`);
+    text.appendChild(title);
+    text.appendChild(desc);
+    row.appendChild(text);
+    list.appendChild(row);
+  }
+}
+
+function renderCheckinModal() {
+  const body = document.getElementById('checkin-body');
+  if (!body) return;
+  body.innerHTML = '';
+
+  const { state, alreadyChecked, reward } = checkInToday(checkin);
+  if (!alreadyChecked) {
+    checkin = state;
+    saveCheckin();
+    pendingExtras.undos += reward.undos;
+    pendingExtras.hints += reward.hints;
+    toast.show(i18n.t('toast.checkin', { n: state.streak }), { icon: '✅' });
+    evaluateAchievements();
+  }
+
+  const streakEl = document.createElement('div');
+  streakEl.className = 'checkin-streak';
+  streakEl.textContent = `${checkin.streak}`;
+  body.appendChild(streakEl);
+
+  const streakLabel = document.createElement('div');
+  streakLabel.textContent = i18n.t('checkin.streak', { n: checkin.streak });
+  body.appendChild(streakLabel);
+
+  const summary = document.createElement('div');
+  summary.className = 'checkin-summary';
+  const a = document.createElement('div');
+  a.textContent = i18n.t('checkin.best', { n: checkin.bestStreak });
+  const b = document.createElement('div');
+  b.textContent = i18n.t('checkin.total', { n: checkin.totalDays });
+  summary.appendChild(a);
+  summary.appendChild(b);
+  body.appendChild(summary);
+
+  const reward2 = computeReward(checkin.streak);
+  const rewardEl = document.createElement('div');
+  rewardEl.className = 'checkin-reward';
+  rewardEl.textContent = i18n.t('checkin.rewardLine', { undos: reward2.undos, hints: reward2.hints });
+  body.appendChild(rewardEl);
+
+  const status = document.createElement('div');
+  status.className = 'checkin-actions';
+  status.textContent = alreadyChecked ? i18n.t('checkin.today') : i18n.t('checkin.comeBack');
+  body.appendChild(status);
+}
+
+function renderLeaderboardModal() {
+  const tabs = document.getElementById('lb-tabs');
+  const body = document.getElementById('lb-body');
+  if (!tabs || !body) return;
+  tabs.innerHTML = '';
+  const modes = ['classic', 'daily', 'stages', 'timeAttack'];
+  for (const m of modes) {
+    const btn = document.createElement('button');
+    btn.className = `lb-tab${m === lbActiveTab ? ' active' : ''}`;
+    btn.dataset.action = 'lb-tab';
+    btn.dataset.mode = m;
+    btn.textContent = i18n.t(`mode.${m}`);
+    tabs.appendChild(btn);
+  }
+  body.innerHTML = '';
+  const entries = leaderboard[lbActiveTab] ?? [];
+  if (entries.length === 0) {
+    const p = document.createElement('div');
+    p.className = 'lb-empty';
+    p.textContent = i18n.t('lb.empty');
+    body.appendChild(p);
+    return;
+  }
+  const table = document.createElement('table');
+  table.className = 'lb-table';
+  const head = document.createElement('tr');
+  for (const key of ['rank', 'score', 'date']) {
+    const th = document.createElement('th');
+    th.textContent = i18n.t(`lb.${key}`);
+    if (key === 'score') th.style.textAlign = 'right';
+    head.appendChild(th);
+  }
+  table.appendChild(head);
+  entries.forEach((e, i) => {
+    const tr = document.createElement('tr');
+    const r = document.createElement('td');
+    r.className = 'lb-rank';
+    r.textContent = i + 1;
+    const s = document.createElement('td');
+    s.className = 'lb-score';
+    s.textContent = e.score;
+    const d = document.createElement('td');
+    d.textContent = new Date(e.ts).toLocaleDateString();
+    tr.appendChild(r);
+    tr.appendChild(s);
+    tr.appendChild(d);
+    table.appendChild(tr);
+  });
+  body.appendChild(table);
 }
 
 function renderStatsModal() {
@@ -542,6 +765,11 @@ function bindUi() {
     refreshAll();
     renderThemePicker();
   });
+  document.getElementById('select-shape').addEventListener('change', (e) => {
+    settings.shape = e.target.value;
+    applyShape(settings.shape);
+    saveSettings();
+  });
 
   document.body.addEventListener('click', (e) => {
     const target = e.target.closest('[data-action]');
@@ -630,6 +858,38 @@ function bindUi() {
       case 'pick-theme':
         pickTheme(target.dataset.theme);
         break;
+      case 'open-achievements':
+        closeModal('settings-modal');
+        renderAchievementsModal();
+        openModal('achievements-modal');
+        break;
+      case 'close-achievements':
+        closeModal('achievements-modal');
+        break;
+      case 'open-checkin':
+        closeModal('settings-modal');
+        renderCheckinModal();
+        openModal('checkin-modal');
+        break;
+      case 'close-checkin':
+        closeModal('checkin-modal');
+        break;
+      case 'open-leaderboard':
+        closeModal('settings-modal');
+        lbActiveTab = mode;
+        renderLeaderboardModal();
+        openModal('leaderboard-modal');
+        break;
+      case 'close-leaderboard':
+        closeModal('leaderboard-modal');
+        break;
+      case 'lb-tab':
+        lbActiveTab = target.dataset.mode;
+        renderLeaderboardModal();
+        break;
+      case 'revive':
+        handleRevive();
+        break;
       default: break;
     }
   });
@@ -652,7 +912,10 @@ function bindGameEvents() {
     const rect = board.getBoundingClientRect();
     scorePopup(`+${gained}`, rect.left + rect.width / 2, rect.top + rect.height / 2, 'clear');
     if (combo >= 2) comboBubble(combo, board);
-    if (emptyAfter) fullClearBanner(board);
+    if (emptyAfter) {
+      fullClearBanner(board);
+      everFullClear = true;
+    }
     analytics.track('lines_cleared', { mode, rows: rows.length, cols: cols.length, combo, gained });
   });
 
@@ -669,12 +932,24 @@ function maybeShowTutorial() {
   }
 }
 
+function maybeShowDailyCheckin() {
+  if (checkin.lastDay === dayKey(new Date())) return;
+  if (!storage.get(KEYS.tutorialDone, false)) return;
+  setTimeout(() => {
+    renderCheckinModal();
+    openModal('checkin-modal');
+  }, 1200);
+}
+
 function bootstrap() {
   errors.install();
   storage.runMigrations();
   loadBest();
   loadSettings();
   loadStats();
+  loadAchievements();
+  loadCheckin();
+  loadLeaderboard();
   i18n.init(settings.language);
   initBoard(document.getElementById('board'));
   initTray(document.getElementById('tray'));
@@ -686,7 +961,9 @@ function bootstrap() {
   mode = 'classic';
   modeOpts = {};
   newGame();
+  evaluateAchievements();
   maybeShowTutorial();
+  maybeShowDailyCheckin();
 
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) stopTimer();

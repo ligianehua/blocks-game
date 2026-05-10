@@ -97,6 +97,14 @@
                 <option value="en">English</option>
               </select>
             </li>
+            <li>
+              <span data-i18n="settings.shape">方块形状</span>
+              <select id="select-shape">
+                <option value="rounded" data-i18n="shape.rounded">圆角</option>
+                <option value="sharp" data-i18n="shape.sharp">硬朗</option>
+                <option value="pill" data-i18n="shape.pill">圆形</option>
+              </select>
+            </li>
             <li class="theme-row">
               <span data-i18n="settings.theme">主题</span>
               <div id="theme-picker" class="theme-picker"></div>
@@ -105,6 +113,9 @@
           <div class="settings-modes">
             <button class="btn btn-secondary" data-action="open-mode" data-i18n="settings.modes">切换模式</button>
             <button class="btn btn-secondary" data-action="open-stats" data-i18n="settings.stats">统计</button>
+            <button class="btn btn-secondary" data-action="open-achievements" data-i18n="settings.achievements">成就</button>
+            <button class="btn btn-secondary" data-action="open-checkin" data-i18n="settings.checkin">签到</button>
+            <button class="btn btn-secondary" data-action="open-leaderboard" data-i18n="settings.leaderboard">排行榜</button>
             <button class="btn btn-secondary" data-action="show-tutorial" data-i18n="settings.tutorial">教学</button>
           </div>
           <div class="modal-actions">
@@ -205,6 +216,7 @@
             <div id="gameover-stars" class="gameover-stars" hidden></div>
             <div id="gameover-newrecord" class="new-record" hidden data-i18n="gameover.newRecord">破纪录！</div>
           </div>
+          <button id="btn-revive" class="btn btn-primary revive-btn" data-action="revive" hidden data-i18n="gameover.revive">看广告复活</button>
           <div class="modal-actions modal-actions-3">
             <button class="btn btn-secondary" data-action="open-mode" data-i18n="gameover.menu">菜单</button>
             <button class="btn btn-secondary" data-action="share" data-i18n="gameover.share">分享</button>
@@ -212,6 +224,40 @@
           </div>
         </div>
       </div>
+
+      <div id="achievements-modal" class="modal" hidden>
+        <div class="modal-card">
+          <header class="modal-header">
+            <h2 data-i18n="ach.title">成就</h2>
+            <button class="modal-close" data-action="close-achievements" aria-label="close">×</button>
+          </header>
+          <div id="ach-progress" class="ach-progress"></div>
+          <div id="ach-list" class="ach-list"></div>
+        </div>
+      </div>
+
+      <div id="checkin-modal" class="modal" hidden>
+        <div class="modal-card">
+          <header class="modal-header">
+            <h2 data-i18n="checkin.title">每日签到</h2>
+            <button class="modal-close" data-action="close-checkin" aria-label="close">×</button>
+          </header>
+          <div id="checkin-body" class="checkin-body"></div>
+        </div>
+      </div>
+
+      <div id="leaderboard-modal" class="modal" hidden>
+        <div class="modal-card">
+          <header class="modal-header">
+            <h2 data-i18n="lb.title">排行榜</h2>
+            <button class="modal-close" data-action="close-leaderboard" aria-label="close">×</button>
+          </header>
+          <div class="lb-tabs" id="lb-tabs"></div>
+          <div id="lb-body" class="lb-body"></div>
+        </div>
+      </div>
+
+      <div id="toast-root" class="toast-root" aria-live="polite"></div>
 
       <div id="stats-modal" class="modal" hidden>
         <div class="modal-card">

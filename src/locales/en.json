@@ -1,0 +1,164 @@
+{
+  "score": {
+    "current": "Score",
+    "best": "Best"
+  },
+  "daily": {
+    "title": "Daily",
+    "pickTitle": "Choose Difficulty",
+    "easy": "Easy",
+    "normal": "Normal",
+    "hard": "Hard",
+    "today": "Today {date}",
+    "best": "Today best {n}",
+    "noPlay": "Not played"
+  },
+  "settings": {
+    "title": "Settings",
+    "music": "Music",
+    "sfx": "Sound FX",
+    "haptics": "Vibration",
+    "dark": "Dark mode",
+    "colorblind": "Color-blind friendly",
+    "language": "Language",
+    "theme": "Theme",
+    "shape": "Block shape",
+    "close": "Close",
+    "restart": "Restart",
+    "modes": "Switch Mode",
+    "stats": "Stats",
+    "tutorial": "How to play",
+    "achievements": "Achievements",
+    "checkin": "Daily Check-in",
+    "leaderboard": "Leaderboard"
+  },
+  "shape": {
+    "rounded": "Rounded",
+    "sharp": "Sharp",
+    "pill": "Pill"
+  },
+  "mode": {
+    "title": "Choose Mode",
+    "classic": "Classic",
+    "classicDesc": "Endless score chase",
+    "daily": "Daily Challenge",
+    "dailyDesc": "Same seed worldwide, 3 levels",
+    "stages": "Stages",
+    "stagesDesc": "12 hand-crafted levels",
+    "timeAttack": "Time Attack",
+    "timeAttackDesc": "90-second sprint",
+    "labels": {
+      "classic": "Classic",
+      "daily": "Daily · {difficulty}",
+      "stages": "Stage {n}",
+      "timeAttack": "Time · {sec}s"
+    }
+  },
+  "theme": {
+    "wood": "Wood",
+    "candy": "Candy",
+    "ocean": "Ocean",
+    "space": "Space",
+    "neon": "Neon",
+    "locked": "Unlock at {n}"
+  },
+  "stages": {
+    "title": "Stages",
+    "level": "Level {n}",
+    "targetScore": "Target {n} pts",
+    "targetLines": "Clear {n} lines",
+    "moveBudget": "in {n} moves"
+  },
+  "stats": {
+    "title": "Stats",
+    "totalGames": "Games played",
+    "byMode": "By mode",
+    "totalScore": "Total score",
+    "best": "Best score",
+    "bestCombo": "Best combo",
+    "linesCleared": "Lines cleared",
+    "placements": "Pieces placed",
+    "playTime": "Time played",
+    "stagesCleared": "Stages cleared",
+    "noData": "Nothing yet — play a round!",
+    "reset": "Reset",
+    "close": "Close",
+    "confirmReset": "Clear all stats?"
+  },
+  "ach": {
+    "title": "Achievements",
+    "progress": "{done} / {total}",
+    "locked": "Locked",
+    "first_play": { "title": "First Steps", "desc": "Finish your first game" },
+    "first_clear": { "title": "First Clear", "desc": "Clear your first line" },
+    "score_1k": { "title": "Apprentice", "desc": "Reach 1,000 pts in a single game" },
+    "score_5k": { "title": "Veteran", "desc": "Reach 5,000 pts in a single game" },
+    "score_10k": { "title": "Master", "desc": "Reach 10,000 pts in a single game" },
+    "combo_5": { "title": "On Fire", "desc": "Hit a 5-combo" },
+    "combo_10": { "title": "Unstoppable", "desc": "Hit a 10-combo" },
+    "full_clear": { "title": "Spotless", "desc": "Trigger a full clear" },
+    "lines_100": { "title": "Centurion", "desc": "Clear 100 total lines" },
+    "lines_500": { "title": "Demolisher", "desc": "Clear 500 total lines" },
+    "stages_all": { "title": "Stage Conqueror", "desc": "Complete all 12 stages" },
+    "stages_perfect": { "title": "Three-Star Hero", "desc": "Earn 3 stars on every stage" },
+    "daily_7": { "title": "Loyal Player", "desc": "7-day check-in streak" },
+    "time_500": { "title": "Sprinter", "desc": "Score 500 in Time Attack" },
+    "time_1500": { "title": "Speedster", "desc": "Score 1500 in Time Attack" }
+  },
+  "checkin": {
+    "title": "Daily Check-in",
+    "today": "Already checked in today",
+    "streak": "{n}-day streak",
+    "best": "Best {n} days",
+    "total": "{n} days total",
+    "rewardLine": "Reward: +{undos} undo, +{hints} hint",
+    "claim": "Claim",
+    "comeBack": "See you tomorrow"
+  },
+  "lb": {
+    "title": "Leaderboard",
+    "empty": "No records yet",
+    "rank": "#",
+    "score": "Score",
+    "date": "Date"
+  },
+  "action": {
+    "undo": "Undo",
+    "hint": "Hint",
+    "noUndo": "No undo left",
+    "noHint": "No hint available"
+  },
+  "tutorial": {
+    "title": "How to Play",
+    "step1": "Drag a piece from the tray onto the board. Green = valid, red = blocked.",
+    "step2": "Fill an entire row or column to clear it and score points.",
+    "step3": "Chain consecutive clears for combo bonuses up to 3x!",
+    "next": "Next",
+    "prev": "Back",
+    "done": "Play"
+  },
+  "gameover": {
+    "title": "Game Over",
+    "won": "Cleared",
+    "final": "Final Score",
+    "newRecord": "New Record",
+    "restart": "Play Again",
+    "menu": "Menu",
+    "share": "Share",
+    "revive": "Watch ad to revive",
+    "reviveUnavailable": "No ads available"
+  },
+  "orientation": {
+    "message": "Please rotate to portrait"
+  },
+  "combo": {
+    "label": "COMBO x{n}!"
+  },
+  "fullClear": {
+    "label": "FULL CLEAR"
+  },
+  "toast": {
+    "achievement": "Achievement unlocked: {title}",
+    "checkin": "Checked in · {n}-day streak"
+  }
+}

@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#5d3a1f" />
+    <meta name="description" content="A Block Blast / 1010!-style web puzzle game" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <title>Blocks Game</title>
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <button id="btn-settings" class="icon-btn" aria-label="settings">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M19.14 12.94a7.014 7.014 0 0 0 0-1.88l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.61-.22l-2.39.96a7 7 0 0 0-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.43h-3.84a.5.5 0 0 0-.5.43l-.36 2.54c-.59.24-1.13.55-1.62.94l-2.39-.96a.5.5 0 0 0-.61.22L2.71 8.84a.5.5 0 0 0 .12.64l2.03 1.58a7.014 7.014 0 0 0 0 1.88l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32a.5.5 0 0 0 .61.22l2.39-.96c.49.39 1.03.7 1.62.94l.36 2.54a.5.5 0 0 0 .5.43h3.84a.5.5 0 0 0 .5-.43l.36-2.54c.59-.24 1.13-.55 1.62-.94l2.39.96a.5.5 0 0 0 .61-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58zM12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"/></svg>
+        </button>
+        <div class="score-block">
+          <div class="score-label" data-i18n="score.current">本局分数</div>
+          <div id="current-score" class="score-current">0</div>
+          <div class="score-best">
+            <span data-i18n="score.best">我的最高分</span>
+            <span id="best-score">0</span>
+          </div>
+        </div>
+        <button id="btn-daily" class="daily-btn" aria-label="daily challenge">
+          <span data-i18n="daily.title">每日挑战</span>
+        </button>
+      </header>
+
+      <div id="mode-banner" class="mode-banner" hidden>
+        <span id="mode-banner-label"></span>
+        <span id="mode-banner-status"></span>
+      </div>
+
+      <div class="progress">
+        <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
+        <div class="progress-marks">
+          <span>2K</span><span>3K</span><span>4K</span><span>5K</span>
+        </div>
+      </div>
+
+      <div id="board" class="board" aria-label="game board"></div>
+
+      <div class="action-bar">
+        <button id="btn-undo" class="action-btn" aria-label="undo">
+          <span class="action-icon">↶</span>
+          <span class="action-label" data-i18n="action.undo">撤销</span>
+          <span class="action-count" id="undo-count">3</span>
+        </button>
+        <button id="btn-hint" class="action-btn" aria-label="hint">
+          <span class="action-icon">💡</span>
+          <span class="action-label" data-i18n="action.hint">提示</span>
+          <span class="action-count" id="hint-count">3</span>
+        </button>
+      </div>
+
+      <div id="tray" class="tray" aria-label="piece tray"></div>
+
+      <div id="orientation-overlay" class="overlay-modal" hidden>
+        <div class="overlay-content">
+          <div class="rotate-icon">📱↻</div>
+          <p data-i18n="orientation.message">请旋转设备至竖屏</p>
+        </div>
+      </div>
+
+      <div id="settings-modal" class="modal" hidden>
+        <div class="modal-card">
+          <header class="modal-header">
+            <h2 data-i18n="settings.title">设置</h2>
+            <button class="modal-close" data-action="close-settings" aria-label="close">×</button>
+          </header>
+          <ul class="settings-list">
+            <li>
+              <span data-i18n="settings.music">音乐</span>
+              <label class="switch"><input type="checkbox" id="toggle-music" checked /><span></span></label>
+            </li>
+            <li>
+              <span data-i18n="settings.sfx">音效</span>
+              <label class="switch"><input type="checkbox" id="toggle-sfx" checked /><span></span></label>
+            </li>
+            <li>
+              <span data-i18n="settings.haptics">震动</span>
+              <label class="switch"><input type="checkbox" id="toggle-haptics" checked /><span></span></label>
+            </li>
+            <li>
+              <span data-i18n="settings.dark">暗色</span>
+              <label class="switch"><input type="checkbox" id="toggle-dark" /><span></span></label>
+            </li>
+            <li>
+              <span data-i18n="settings.colorblind">色弱友好</span>
+              <label class="switch"><input type="checkbox" id="toggle-colorblind" /><span></span></label>
+            </li>
+            <li>
+              <span data-i18n="settings.language">语言</span>
+              <select id="select-language">
+                <option value="zh">中文</option>
+                <option value="en">English</option>
+              </select>
+            </li>
+            <li>
+              <span data-i18n="settings.shape">方块形状</span>
+              <select id="select-shape">
+                <option value="rounded" data-i18n="shape.rounded">圆角</option>
+                <option value="sharp" data-i18n="shape.sharp">硬朗</option>
+                <option value="pill" data-i18n="shape.pill">圆形</option>
+              </select>
+            </li>
+            <li class="theme-row">
+              <span data-i18n="settings.theme">主题</span>
+              <div id="theme-picker" class="theme-picker"></div>
+            </li>
+          </ul>
+          <div class="settings-modes">
+            <button class="btn btn-secondary" data-action="open-mode" data-i18n="settings.modes">切换模式</button>
+            <button class="btn btn-secondary" data-action="open-stats" data-i18n="settings.stats">统计</button>
+            <button class="btn btn-secondary" data-action="open-achievements" data-i18n="settings.achievements">成就</button>
+            <button class="btn btn-secondary" data-action="open-checkin" data-i18n="settings.checkin">签到</button>
+            <button class="btn btn-secondary" data-action="open-leaderboard" data-i18n="settings.leaderboard">排行榜</button>
+            <button class="btn btn-secondary" data-action="show-tutorial" data-i18n="settings.tutorial">教学</button>
+          </div>
+          <div class="modal-actions">
+            <button class="btn btn-secondary" data-action="close-settings" data-i18n="settings.close">关闭</button>
+            <button class="btn btn-primary" data-action="restart" data-i18n="settings.restart">重新挑战</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="mode-modal" class="modal" hidden>
+        <div class="modal-card">
+          <header class="modal-header">
+            <h2 data-i18n="mode.title">选择模式</h2>
+            <button class="modal-close" data-action="close-mode" aria-label="close">×</button>
+          </header>
+          <ul class="mode-list">
+            <li><button class="btn btn-primary" data-action="start-classic">
+              <strong data-i18n="mode.classic">经典模式</strong>
+              <small data-i18n="mode.classicDesc">无尽冲分</small>
+            </button></li>
+            <li><button class="btn btn-secondary" data-action="open-daily">
+              <strong data-i18n="mode.daily">每日挑战</strong>
+              <small data-i18n="mode.dailyDesc">三档难度，全球同种子</small>
+            </button></li>
+            <li><button class="btn btn-secondary" data-action="open-stages">
+              <strong data-i18n="mode.stages">关卡模式</strong>
+              <small data-i18n="mode.stagesDesc">12 关挑战</small>
+            </button></li>
+            <li><button class="btn btn-secondary" data-action="start-time">
+              <strong data-i18n="mode.timeAttack">限时模式</strong>
+              <small data-i18n="mode.timeAttackDesc">90 秒冲刺</small>
+            </button></li>
+          </ul>
+        </div>
+      </div>
+
+      <div id="daily-modal" class="modal" hidden>
+        <div class="modal-card">
+          <header class="modal-header">
+            <h2 data-i18n="daily.pickTitle">选择难度</h2>
+            <button class="modal-close" data-action="close-daily" aria-label="close">×</button>
+          </header>
+          <div class="daily-date" id="daily-date"></div>
+          <ul class="mode-list">
+            <li><button class="btn btn-secondary" data-action="start-daily" data-difficulty="easy">
+              <strong data-i18n="daily.easy">初级</strong>
+              <small id="daily-best-easy"></small>
+            </button></li>
+            <li><button class="btn btn-secondary" data-action="start-daily" data-difficulty="normal">
+              <strong data-i18n="daily.normal">中级</strong>
+              <small id="daily-best-normal"></small>
+            </button></li>
+            <li><button class="btn btn-secondary" data-action="start-daily" data-difficulty="hard">
+              <strong data-i18n="daily.hard">高级</strong>
+              <small id="daily-best-hard"></small>
+            </button></li>
+          </ul>
+        </div>
+      </div>
+
+      <div id="stages-modal" class="modal" hidden>
+        <div class="modal-card">
+          <header class="modal-header">
+            <h2 data-i18n="stages.title">关卡</h2>
+            <button class="modal-close" data-action="close-stages" aria-label="close">×</button>
+          </header>
+          <div id="stage-grid" class="stage-grid"></div>
+        </div>
+      </div>
+
+      <div id="tutorial-modal" class="modal" hidden>
+        <div class="modal-card">
+          <header class="modal-header">
+            <h2 id="tutorial-title" data-i18n="tutorial.title">教学</h2>
+            <button class="modal-close" data-action="close-tutorial" aria-label="skip">×</button>
+          </header>
+          <div class="tutorial-body">
+            <div id="tutorial-step" class="tutorial-step"></div>
+            <div class="tutorial-dots" id="tutorial-dots"></div>
+          </div>
+          <div class="modal-actions">
+            <button class="btn btn-secondary" data-action="tutorial-prev" data-i18n="tutorial.prev">上一步</button>
+            <button class="btn btn-primary" data-action="tutorial-next" data-i18n="tutorial.next">下一步</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="gameover-modal" class="modal" hidden>
+        <div class="modal-card">
+          <header class="modal-header">
+            <h2 id="gameover-title" data-i18n="gameover.title">游戏结束</h2>
+          </header>
+          <div class="gameover-body">
+            <div class="gameover-score">
+              <div data-i18n="gameover.final">最终分数</div>
+              <div id="gameover-final" class="score-current">0</div>
+            </div>
+            <div id="gameover-stars" class="gameover-stars" hidden></div>
+            <div id="gameover-newrecord" class="new-record" hidden data-i18n="gameover.newRecord">破纪录！</div>
+          </div>
+          <button id="btn-revive" class="btn btn-primary revive-btn" data-action="revive" hidden data-i18n="gameover.revive">看广告复活</button>
+          <div class="modal-actions modal-actions-3">
+            <button class="btn btn-secondary" data-action="open-mode" data-i18n="gameover.menu">菜单</button>
+            <button class="btn btn-secondary" data-action="share" data-i18n="gameover.share">分享</button>
+            <button class="btn btn-primary" data-action="restart" data-i18n="gameover.restart">重新开始</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="achievements-modal" class="modal" hidden>
+        <div class="modal-card">
+          <header class="modal-header">
+            <h2 data-i18n="ach.title">成就</h2>
+            <button class="modal-close" data-action="close-achievements" aria-label="close">×</button>
+          </header>
+          <div id="ach-progress" class="ach-progress"></div>
+          <div id="ach-list" class="ach-list"></div>
+        </div>
+      </div>
+
+      <div id="checkin-modal" class="modal" hidden>
+        <div class="modal-card">
+          <header class="modal-header">
+            <h2 data-i18n="checkin.title">每日签到</h2>
+            <button class="modal-close" data-action="close-checkin" aria-label="close">×</button>
+          </header>
+          <div id="checkin-body" class="checkin-body"></div>
+        </div>
+      </div>
+
+      <div id="leaderboard-modal" class="modal" hidden>
+        <div class="modal-card">
+          <header class="modal-header">
+            <h2 data-i18n="lb.title">排行榜</h2>
+            <button class="modal-close" data-action="close-leaderboard" aria-label="close">×</button>
+          </header>
+          <div class="lb-tabs" id="lb-tabs"></div>
+          <div id="lb-body" class="lb-body"></div>
+        </div>
+      </div>
+
+      <div id="toast-root" class="toast-root" aria-live="polite"></div>
+
+      <div id="stats-modal" class="modal" hidden>
+        <div class="modal-card">
+          <header class="modal-header">
+            <h2 data-i18n="stats.title">统计</h2>
+            <button class="modal-close" data-action="close-stats" aria-label="close">×</button>
+          </header>
+          <div id="stats-body" class="stats-body"></div>
+          <div class="modal-actions">
+            <button class="btn btn-secondary" data-action="reset-stats" data-i18n="stats.reset">重置</button>
+            <button class="btn btn-primary" data-action="close-stats" data-i18n="stats.close">关闭</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,144 @@
+/* ---------- Theme palettes ---------- */
+/* Each theme overrides the same variables defined in base.css. */
+
+:root,
+:root[data-theme="wood"] {
+  --color-bg-1: #4a2912;
+  --color-bg-2: #5d3a1f;
+  --color-board: #3a2110;
+  --color-cell-empty-a: #2f1c0d;
+  --color-cell-empty-b: #38220f;
+  --tier-1: #6fd6c0;
+  --tier-1-shadow: #3fa893;
+  --tier-2: #95d97a;
+  --tier-2-shadow: #5ea546;
+  --tier-3: #4fb89c;
+  --tier-3-shadow: #2c8771;
+  --color-accent: #ffd54a;
+  --leaf-color-a: #2f5d1c;
+  --leaf-color-b: #3a7124;
+}
+
+:root[data-theme="candy"] {
+  --color-bg-1: #7a3a6a;
+  --color-bg-2: #9c4d8a;
+  --color-board: #4a1f3f;
+  --color-cell-empty-a: #3a1830;
+  --color-cell-empty-b: #441f3a;
+  --tier-1: #ffb4d8;
+  --tier-1-shadow: #d27bab;
+  --tier-2: #ffd47a;
+  --tier-2-shadow: #cc9540;
+  --tier-3: #c79bff;
+  --tier-3-shadow: #8a5ed9;
+  --color-accent: #ffe27a;
+  --leaf-color-a: #ffb4d8;
+  --leaf-color-b: #ffd47a;
+}
+
+:root[data-theme="ocean"] {
+  --color-bg-1: #0a4561;
+  --color-bg-2: #135a85;
+  --color-board: #062c44;
+  --color-cell-empty-a: #052035;
+  --color-cell-empty-b: #082a40;
+  --tier-1: #6ddff0;
+  --tier-1-shadow: #2ea7c7;
+  --tier-2: #7af0c4;
+  --tier-2-shadow: #34b885;
+  --tier-3: #4a8df5;
+  --tier-3-shadow: #2257b8;
+  --color-accent: #ffe27a;
+  --leaf-color-a: #1a7aaf;
+  --leaf-color-b: #1f8fc7;
+}
+
+:root[data-theme="space"] {
+  --color-bg-1: #100722;
+  --color-bg-2: #1a1238;
+  --color-board: #060311;
+  --color-cell-empty-a: #050214;
+  --color-cell-empty-b: #08051a;
+  --tier-1: #b388ff;
+  --tier-1-shadow: #7c4fd6;
+  --tier-2: #6affd4;
+  --tier-2-shadow: #2dbf99;
+  --tier-3: #ff6fcf;
+  --tier-3-shadow: #c93b96;
+  --color-accent: #ffe066;
+  --leaf-color-a: #2a1a4a;
+  --leaf-color-b: #3a2566;
+}
+
+:root[data-theme="neon"] {
+  --color-bg-1: #0a0a14;
+  --color-bg-2: #14141f;
+  --color-board: #050508;
+  --color-cell-empty-a: #06060c;
+  --color-cell-empty-b: #0a0a12;
+  --tier-1: #00ffd0;
+  --tier-1-shadow: #00b894;
+  --tier-2: #ffea00;
+  --tier-2-shadow: #c4a700;
+  --tier-3: #ff2e88;
+  --tier-3-shadow: #b81d63;
+  --color-accent: #00ffd0;
+  --leaf-color-a: #1a1a2a;
+  --leaf-color-b: #232336;
+}
+
+/* ---------- Dark mode (orthogonal to theme) ---------- */
+:root[data-dark="true"] {
+  --color-bg-1: #08060d;
+  --color-bg-2: #100c1a;
+  --color-board: #050308;
+  --color-cell-empty-a: #050308;
+  --color-cell-empty-b: #08060d;
+  --color-text: #e6dccb;
+}
+
+/* ---------- Block shapes (orthogonal to theme) ---------- */
+:root[data-shape="sharp"] .cell.filled,
+:root[data-shape="sharp"] .piece-cell.filled,
+:root[data-shape="sharp"] .stage-cell {
+  border-radius: 2px;
+}
+:root[data-shape="pill"] .cell.filled,
+:root[data-shape="pill"] .piece-cell.filled {
+  border-radius: 50%;
+}
+
+:root[data-colorblind="true"] .cell.filled,
+:root[data-colorblind="true"] .piece-cell.filled {
+  position: relative;
+}
+:root[data-colorblind="true"] .cell.filled::before,
+:root[data-colorblind="true"] .piece-cell.filled::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent 0 4px,
+    rgba(255, 255, 255, 0.35) 4px 6px
+  );
+}
+:root[data-colorblind="true"] .cell.tier-2::before,
+:root[data-colorblind="true"] .piece-cell.tier-2::before {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent 0 5px,
+    rgba(0, 0, 0, 0.3) 5px 7px
+  );
+}
+:root[data-colorblind="true"] .cell.tier-3::before,
+:root[data-colorblind="true"] .piece-cell.tier-3::before {
+  background-image: radial-gradient(
+    circle at 30% 30%,
+    rgba(255, 255, 255, 0.5) 0 2px,
+    transparent 3px
+  );
+  background-size: 8px 8px;
+}

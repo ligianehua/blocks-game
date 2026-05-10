@@ -1,0 +1,164 @@
+{
+  "score": {
+    "current": "本局分数",
+    "best": "我的最高分"
+  },
+  "daily": {
+    "title": "每日挑战",
+    "pickTitle": "选择难度",
+    "easy": "初级",
+    "normal": "中级",
+    "hard": "高级",
+    "today": "今天 {date}",
+    "best": "今日最高 {n}",
+    "noPlay": "未挑战"
+  },
+  "settings": {
+    "title": "设置",
+    "music": "音乐",
+    "sfx": "音效",
+    "haptics": "震动",
+    "dark": "暗色模式",
+    "colorblind": "色弱友好",
+    "language": "语言",
+    "theme": "主题",
+    "shape": "方块形状",
+    "close": "关闭",
+    "restart": "重新挑战",
+    "modes": "切换模式",
+    "stats": "统计",
+    "tutorial": "教学",
+    "achievements": "成就",
+    "checkin": "签到",
+    "leaderboard": "排行榜"
+  },
+  "shape": {
+    "rounded": "圆角",
+    "sharp": "硬朗",
+    "pill": "圆形"
+  },
+  "mode": {
+    "title": "选择模式",
+    "classic": "经典模式",
+    "classicDesc": "无尽冲分",
+    "daily": "每日挑战",
+    "dailyDesc": "三档难度,全球同种子",
+    "stages": "关卡模式",
+    "stagesDesc": "12 关挑战",
+    "timeAttack": "限时模式",
+    "timeAttackDesc": "90 秒冲刺",
+    "labels": {
+      "classic": "经典",
+      "daily": "每日 · {difficulty}",
+      "stages": "关卡 {n}",
+      "timeAttack": "限时 · {sec}s"
+    }
+  },
+  "theme": {
+    "wood": "木质",
+    "candy": "糖果",
+    "ocean": "海洋",
+    "space": "太空",
+    "neon": "霓虹",
+    "locked": "需 {n} 分解锁"
+  },
+  "stages": {
+    "title": "关卡",
+    "level": "第 {n} 关",
+    "targetScore": "目标分数 {n}",
+    "targetLines": "消除 {n} 行",
+    "moveBudget": "{n} 步内"
+  },
+  "stats": {
+    "title": "统计",
+    "totalGames": "总游戏数",
+    "byMode": "各模式",
+    "totalScore": "累计得分",
+    "best": "最高分",
+    "bestCombo": "最长连击",
+    "linesCleared": "消除行数",
+    "placements": "放置块数",
+    "playTime": "游戏时长",
+    "stagesCleared": "通关数",
+    "noData": "暂无数据,玩一局看看吧",
+    "reset": "重置",
+    "close": "关闭",
+    "confirmReset": "确认清除全部统计数据?"
+  },
+  "ach": {
+    "title": "成就",
+    "progress": "{done} / {total}",
+    "locked": "未解锁",
+    "first_play": { "title": "踏出第一步", "desc": "完成第一局游戏" },
+    "first_clear": { "title": "首次消除", "desc": "消除第一行" },
+    "score_1k": { "title": "学徒", "desc": "单局达到 1000 分" },
+    "score_5k": { "title": "老手", "desc": "单局达到 5000 分" },
+    "score_10k": { "title": "大师", "desc": "单局达到 10000 分" },
+    "combo_5": { "title": "燃起来了", "desc": "达成 5 连击" },
+    "combo_10": { "title": "势不可挡", "desc": "达成 10 连击" },
+    "full_clear": { "title": "焕然一新", "desc": "触发一次全清" },
+    "lines_100": { "title": "百行斩", "desc": "累计消除 100 行" },
+    "lines_500": { "title": "拆楼专家", "desc": "累计消除 500 行" },
+    "stages_all": { "title": "通关达人", "desc": "通关全部 12 关" },
+    "stages_perfect": { "title": "三星神", "desc": "全部关卡三星" },
+    "daily_7": { "title": "忠实玩家", "desc": "连续签到 7 天" },
+    "time_500": { "title": "短跑选手", "desc": "限时模式 500 分" },
+    "time_1500": { "title": "极速达人", "desc": "限时模式 1500 分" }
+  },
+  "checkin": {
+    "title": "每日签到",
+    "today": "今日已签到",
+    "streak": "连续 {n} 天",
+    "best": "最长连续 {n} 天",
+    "total": "累计 {n} 天",
+    "rewardLine": "本次奖励:撤销 +{undos},提示 +{hints}",
+    "claim": "领取奖励",
+    "comeBack": "明天再来"
+  },
+  "lb": {
+    "title": "排行榜",
+    "empty": "暂无记录",
+    "rank": "#",
+    "score": "分数",
+    "date": "日期"
+  },
+  "action": {
+    "undo": "撤销",
+    "hint": "提示",
+    "noUndo": "无可撤销",
+    "noHint": "无可提示"
+  },
+  "tutorial": {
+    "title": "新手教学",
+    "step1": "拖拽底部方块到棋盘上的任意位置。绿色 = 可放置,红色 = 不可放置。",
+    "step2": "填满整行或整列即可消除得分。",
+    "step3": "连续多回合消除可触发连击,倍率最高 3 倍!",
+    "next": "下一步",
+    "prev": "上一步",
+    "done": "开始游戏"
+  },
+  "gameover": {
+    "title": "游戏结束",
+    "won": "通关",
+    "final": "最终分数",
+    "newRecord": "破纪录",
+    "restart": "重新开始",
+    "menu": "菜单",
+    "share": "分享",
+    "revive": "看广告复活",
+    "reviveUnavailable": "暂无可用广告"
+  },
+  "orientation": {
+    "message": "请旋转设备至竖屏"
+  },
+  "combo": {
+    "label": "COMBO x{n}!"
+  },
+  "fullClear": {
+    "label": "全清"
+  },
+  "toast": {
+    "achievement": "成就解锁:{title}",
+    "checkin": "签到成功 · 连续 {n} 天"
+  }
+}

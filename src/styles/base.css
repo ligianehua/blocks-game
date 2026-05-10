@@ -1,0 +1,78 @@
+:root {
+  --board-size: 8;
+
+  --color-bg-1: #4a2912;
+  --color-bg-2: #5d3a1f;
+  --color-board: #3a2110;
+  --color-cell-empty-a: #2f1c0d;
+  --color-cell-empty-b: #38220f;
+
+  --tier-1: #6fd6c0;
+  --tier-1-shadow: #3fa893;
+  --tier-2: #95d97a;
+  --tier-2-shadow: #5ea546;
+  --tier-3: #4fb89c;
+  --tier-3-shadow: #2c8771;
+
+  --color-text: #fff5e1;
+  --color-accent: #ffd54a;
+  --color-danger: #ff5a5a;
+
+  --font-stack: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB",
+    "Microsoft Yahei", system-ui, "Segoe UI", Roboto, sans-serif;
+
+  --safe-top: env(safe-area-inset-top, 0);
+  --safe-bottom: env(safe-area-inset-bottom, 0);
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font-stack);
+  color: var(--color-text);
+  background:
+    radial-gradient(circle at 20% 0%, #6b3d1f 0%, transparent 60%),
+    linear-gradient(180deg, var(--color-bg-1), var(--color-bg-2));
+  background-attachment: fixed;
+  touch-action: manipulation;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background:
+    radial-gradient(ellipse at 10% 80%, #2f5d1c 0%, transparent 60%),
+    radial-gradient(ellipse at 50% 70%, #3a7124 0%, transparent 60%),
+    radial-gradient(ellipse at 90% 80%, #2f5d1c 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+#app {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: calc(var(--safe-top) + 16px) 16px calc(var(--safe-bottom) + 16px);
+  gap: 12px;
+}

@@ -1,0 +1,34 @@
+{
+  "score": {
+    "current": "本局分数",
+    "best": "我的最高分"
+  },
+  "daily": {
+    "title": "每日挑战",
+    "comingSoon": "即将开放"
+  },
+  "settings": {
+    "title": "设置",
+    "music": "音乐",
+    "sfx": "音效",
+    "haptics": "震动",
+    "language": "语言",
+    "close": "关闭",
+    "restart": "重新挑战"
+  },
+  "gameover": {
+    "title": "游戏结束",
+    "final": "最终分数",
+    "newRecord": "破纪录！",
+    "restart": "重新开始"
+  },
+  "orientation": {
+    "message": "请旋转设备至竖屏"
+  },
+  "combo": {
+    "label": "COMBO x{n}!"
+  },
+  "fullClear": {
+    "label": "全清！"
+  }
+}

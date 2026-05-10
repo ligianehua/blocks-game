@@ -1,0 +1,34 @@
+{
+  "score": {
+    "current": "Score",
+    "best": "Best"
+  },
+  "daily": {
+    "title": "Daily",
+    "comingSoon": "Coming soon"
+  },
+  "settings": {
+    "title": "Settings",
+    "music": "Music",
+    "sfx": "Sound FX",
+    "haptics": "Vibration",
+    "language": "Language",
+    "close": "Close",
+    "restart": "Restart"
+  },
+  "gameover": {
+    "title": "Game Over",
+    "final": "Final Score",
+    "newRecord": "New Record!",
+    "restart": "Play Again"
+  },
+  "orientation": {
+    "message": "Please rotate to portrait"
+  },
+  "combo": {
+    "label": "COMBO x{n}!"
+  },
+  "fullClear": {
+    "label": "FULL CLEAR!"
+  }
+}

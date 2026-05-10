@@ -1,4 +1,5 @@
 import './styles/base.css';
+import './styles/themes.css';
 import './styles/components.css';
 
 import { on, clear as clearEvents } from './core/events.js';
@@ -8,6 +9,7 @@ import { startTimeAttack, DEFAULT_DURATION_MS } from './game/modes/timeAttack.js
 import { startStage, LEVELS, getLevel, rateStars } from './game/modes/stages.js';
 import { placePiece, undoLast, useHint, tickTime } from './game/state.js';
 import { nextMilestone, progressToNext } from './game/score.js';
+import { emptyStats, recordGameOver, formatDuration } from './game/stats.js';
 import {
   initBoard,
   initTray,
@@ -21,11 +23,21 @@ import { attachTrayDrag } from './ui/drag.js';
 import { openModal, closeModal, isOpen } from './ui/modal.js';
 import { scorePopup, comboBubble, fullClearBanner } from './ui/animations.js';
 import * as tutorial from './ui/tutorial.js';
+import {
+  THEMES,
+  applyTheme,
+  applyDark,
+  applyColorblind,
+  isUnlocked,
+  isKnownTheme,
+} from './ui/theme.js';
+import { renderCard, shareOrDownload } from './ui/share.js';
 import * as storage from './platform/web/storage.js';
 import * as audio from './platform/web/audio.js';
 import * as haptics from './platform/web/haptics.js';
 import * as i18n from './platform/web/i18n.js';
 import * as analytics from './platform/web/analytics.js';
+import * as errors from './platform/web/errors.js';
 
 const KEYS = {
   best: 'bg.highScore',
@@ -35,13 +47,16 @@ const KEYS = {
   settings: 'bg.settings',
   save: 'bg.save',
   tutorialDone: 'bg.tutorialDone',
+  stats: 'bg.stats',
 };
 
 let game = null;
+let gameStartTs = 0;
 let mode = 'classic';
 let modeOpts = {};
 let bestScore = 0;
 let timeAttackBest = 0;
+let stats = emptyStats();
 let timer = null;
 let timerStart = 0;
 let settings = {
@@ -49,7 +64,12 @@ let settings = {
   sfx: true,
   haptics: true,
   language: null,
+  theme: 'wood',
+  dark: false,
+  colorblind: false,
 };
+
+let lastResult = null;
 
 function loadSettings() {
   const stored = storage.get(KEYS.settings, {});
@@ -57,6 +77,18 @@ function loadSettings() {
   audio.setMuted('music', !settings.music);
   audio.setMuted('sfx', !settings.sfx);
   haptics.setEnabled(settings.haptics);
+  applyDark(!!settings.dark);
+  applyColorblind(!!settings.colorblind);
+  if (!isUnlocked(settings.theme, bestScore)) settings.theme = 'wood';
+  applyTheme(settings.theme);
+}
+
+function loadStats() {
+  stats = storage.get(KEYS.stats, null) ?? emptyStats();
+}
+
+function saveStats() {
+  storage.set(KEYS.stats, stats);
 }
 
 function saveSettings() {
@@ -167,6 +199,7 @@ function newGame() {
   } else if (mode === 'stages') {
     game = startStage(modeOpts.levelId);
   }
+  gameStartTs = performance.now();
   refreshAll();
   closeModal('gameover-modal');
   closeModal('settings-modal');
@@ -229,7 +262,58 @@ function syncSettingsToUi() {
   document.getElementById('toggle-music').checked = settings.music;
   document.getElementById('toggle-sfx').checked = settings.sfx;
   document.getElementById('toggle-haptics').checked = settings.haptics;
+  document.getElementById('toggle-dark').checked = !!settings.dark;
+  document.getElementById('toggle-colorblind').checked = !!settings.colorblind;
   document.getElementById('select-language').value = i18n.getLocale();
+  renderThemePicker();
+}
+
+function renderThemePicker() {
+  const picker = document.getElementById('theme-picker');
+  if (!picker) return;
+  picker.innerHTML = '';
+  for (const theme of THEMES) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'theme-swatch';
+    btn.dataset.action = 'pick-theme';
+    btn.dataset.theme = theme.id;
+    btn.title = i18n.t(`theme.${theme.id}`);
+    if (settings.theme === theme.id) btn.classList.add('selected');
+    const unlocked = isUnlocked(theme.id, bestScore);
+    if (!unlocked) {
+      btn.classList.add('locked');
+      btn.disabled = true;
+      btn.dataset.lock = i18n.t('theme.locked', { n: theme.unlockScore });
+    }
+
+    const tile = document.createElement('div');
+    tile.className = 'theme-swatch-preview';
+    tile.dataset.theme = theme.id;
+    btn.appendChild(tile);
+
+    const label = document.createElement('span');
+    label.className = 'theme-swatch-label';
+    label.textContent = i18n.t(`theme.${theme.id}`);
+    btn.appendChild(label);
+
+    if (!unlocked) {
+      const lock = document.createElement('span');
+      lock.className = 'theme-swatch-lock';
+      lock.textContent = `🔒 ${theme.unlockScore}`;
+      btn.appendChild(lock);
+    }
+    picker.appendChild(btn);
+  }
+}
+
+function pickTheme(themeId) {
+  if (!isKnownTheme(themeId)) return;
+  if (!isUnlocked(themeId, bestScore)) return;
+  settings.theme = themeId;
+  applyTheme(themeId);
+  saveSettings();
+  renderThemePicker();
 }
 
 function renderDailyModal() {
@@ -314,6 +398,18 @@ function showGameOver({ score, won }) {
   const wasRecord = persistResult(score, won);
   if (wasRecord && mode === 'classic') audio.play('newrecord');
 
+  const durationMs = Math.max(0, performance.now() - gameStartTs);
+  stats = recordGameOver(stats, {
+    mode,
+    score,
+    won,
+    bestCombo: game?.bestCombo ?? 0,
+    linesCleared: game?.linesCleared ?? 0,
+    placements: game?.placementsMade ?? 0,
+    durationMs,
+  });
+  saveStats();
+
   const titleEl = document.getElementById('gameover-title');
   titleEl.textContent = won ? i18n.t('gameover.won') : i18n.t('gameover.title');
   document.getElementById('gameover-final').textContent = score;
@@ -329,9 +425,75 @@ function showGameOver({ score, won }) {
     starsEl.hidden = true;
   }
 
+  lastResult = {
+    score,
+    won,
+    bestCombo: game?.bestCombo ?? 0,
+    linesCleared: game?.linesCleared ?? 0,
+    mode,
+    modeLabel: modeLabel(),
+    dateStr: new Date().toLocaleDateString(),
+  };
+
   if (mode === 'classic') storage.remove(KEYS.save);
   openModal('gameover-modal');
   analytics.track('game_over', { mode, score, won });
+}
+
+function modeLabel() {
+  if (mode === 'classic') return i18n.t('mode.labels.classic');
+  if (mode === 'daily') return i18n.t('mode.labels.daily', { difficulty: i18n.t(`daily.${modeOpts.difficulty}`) });
+  if (mode === 'stages') return i18n.t('mode.labels.stages', { n: modeOpts.levelId });
+  if (mode === 'timeAttack') return i18n.t('mode.labels.timeAttack', { sec: Math.round((modeOpts.durationMs ?? DEFAULT_DURATION_MS) / 1000) });
+  return mode;
+}
+
+async function handleShare() {
+  if (!lastResult) return;
+  const canvas = renderCard(lastResult);
+  await shareOrDownload(canvas);
+}
+
+function renderStatsModal() {
+  const body = document.getElementById('stats-body');
+  if (!body) return;
+  body.innerHTML = '';
+
+  if (!stats || stats.games.total === 0) {
+    const p = document.createElement('p');
+    p.className = 'stats-empty';
+    p.textContent = i18n.t('stats.noData');
+    body.appendChild(p);
+    return;
+  }
+
+  const rows = [
+    [i18n.t('stats.totalGames'), stats.games.total],
+    [`· ${i18n.t('mode.classic')}`, stats.games.classic ?? 0],
+    [`· ${i18n.t('mode.daily')}`, stats.games.daily ?? 0],
+    [`· ${i18n.t('mode.stages')}`, stats.games.stages ?? 0],
+    [`· ${i18n.t('mode.timeAttack')}`, stats.games.timeAttack ?? 0],
+    [i18n.t('stats.stagesCleared'), stats.won.stages ?? 0],
+    [i18n.t('stats.best'), stats.score.best],
+    [i18n.t('stats.totalScore'), stats.score.total],
+    [i18n.t('stats.bestCombo'), stats.bestCombo],
+    [i18n.t('stats.linesCleared'), stats.linesCleared],
+    [i18n.t('stats.placements'), stats.placements],
+    [i18n.t('stats.playTime'), formatDuration(stats.timeMs)],
+  ];
+  const table = document.createElement('table');
+  table.className = 'stats-table';
+  for (const [label, value] of rows) {
+    const tr = document.createElement('tr');
+    const a = document.createElement('th');
+    a.textContent = label;
+    const b = document.createElement('td');
+    b.textContent = value;
+    tr.appendChild(a);
+    tr.appendChild(b);
+    table.appendChild(tr);
+  }
+  body.appendChild(table);
 }
 
 function bindUi() {
@@ -363,11 +525,22 @@ function bindUi() {
     haptics.setEnabled(settings.haptics);
     saveSettings();
   });
+  document.getElementById('toggle-dark').addEventListener('change', (e) => {
+    settings.dark = e.target.checked;
+    applyDark(settings.dark);
+    saveSettings();
+  });
+  document.getElementById('toggle-colorblind').addEventListener('change', (e) => {
+    settings.colorblind = e.target.checked;
+    applyColorblind(settings.colorblind);
+    saveSettings();
+  });
   document.getElementById('select-language').addEventListener('change', (e) => {
     settings.language = e.target.value;
     i18n.setLocale(e.target.value);
     saveSettings();
     refreshAll();
+    renderThemePicker();
   });
 
   document.body.addEventListener('click', (e) => {
@@ -436,6 +609,27 @@ function bindUi() {
       case 'restart':
         newGame();
         break;
+      case 'open-stats':
+        closeModal('settings-modal');
+        renderStatsModal();
+        openModal('stats-modal');
+        break;
+      case 'close-stats':
+        closeModal('stats-modal');
+        break;
+      case 'reset-stats':
+        if (confirm(i18n.t('stats.confirmReset'))) {
+          stats = emptyStats();
+          saveStats();
+          renderStatsModal();
+        }
+        break;
+      case 'share':
+        handleShare();
+        break;
+      case 'pick-theme':
+        pickTheme(target.dataset.theme);
+        break;
       default: break;
     }
   });
@@ -476,10 +670,12 @@ function maybeShowTutorial() {
 }
 
 function bootstrap() {
+  errors.install();
   storage.runMigrations();
-  loadSettings();
-  i18n.init(settings.language);
   loadBest();
+  loadSettings();
+  loadStats();
+  i18n.init(settings.language);
   initBoard(document.getElementById('board'));
   initTray(document.getElementById('tray'));
   bindUi();

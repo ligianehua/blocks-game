@@ -18,10 +18,14 @@
     "music": "音乐",
     "sfx": "音效",
     "haptics": "震动",
+    "dark": "暗色模式",
+    "colorblind": "色弱友好",
     "language": "语言",
+    "theme": "主题",
     "close": "关闭",
     "restart": "重新挑战",
     "modes": "切换模式",
+    "stats": "统计",
     "tutorial": "教学"
   },
   "mode": {
@@ -29,7 +33,7 @@
     "classic": "经典模式",
     "classicDesc": "无尽冲分",
     "daily": "每日挑战",
-    "dailyDesc": "三档难度，全球同种子",
+    "dailyDesc": "三档难度,全球同种子",
     "stages": "关卡模式",
     "stagesDesc": "12 关挑战",
     "timeAttack": "限时模式",
@@ -41,12 +45,36 @@
       "timeAttack": "限时 · {sec}s"
     }
   },
+  "theme": {
+    "wood": "木质",
+    "candy": "糖果",
+    "ocean": "海洋",
+    "space": "太空",
+    "neon": "霓虹",
+    "locked": "需 {n} 分解锁"
+  },
   "stages": {
     "title": "关卡",
     "level": "第 {n} 关",
     "targetScore": "目标分数 {n}",
     "targetLines": "消除 {n} 行",
     "moveBudget": "{n} 步内"
+  },
+  "stats": {
+    "title": "统计",
+    "totalGames": "总游戏数",
+    "byMode": "各模式",
+    "totalScore": "累计得分",
+    "best": "最高分",
+    "bestCombo": "最长连击",
+    "linesCleared": "消除行数",
+    "placements": "放置块数",
+    "playTime": "游戏时长",
+    "stagesCleared": "通关数",
+    "noData": "暂无数据,玩一局看看吧",
+    "reset": "重置",
+    "close": "关闭",
+    "confirmReset": "确认清除全部统计数据?"
   },
   "action": {
     "undo": "撤销",
@@ -56,20 +84,21 @@
   },
   "tutorial": {
     "title": "新手教学",
-    "step1": "拖拽底部方块到棋盘上的任意位置。绿色 = 可放置，红色 = 不可放置。",
+    "step1": "拖拽底部方块到棋盘上的任意位置。绿色 = 可放置,红色 = 不可放置。",
     "step2": "填满整行或整列即可消除得分。",
-    "step3": "连续多回合消除可触发连击，倍率最高 3 倍！",
+    "step3": "连续多回合消除可触发连击,倍率最高 3 倍!",
     "next": "下一步",
     "prev": "上一步",
     "done": "开始游戏"
   },
   "gameover": {
     "title": "游戏结束",
-    "won": "通关！",
+    "won": "通关",
     "final": "最终分数",
-    "newRecord": "破纪录！",
+    "newRecord": "破纪录",
     "restart": "重新开始",
-    "menu": "菜单"
+    "menu": "菜单",
+    "share": "分享"
   },
   "orientation": {
     "message": "请旋转设备至竖屏"
@@ -78,6 +107,6 @@
     "label": "COMBO x{n}!"
   },
   "fullClear": {
-    "label": "全清！"
+    "label": "全清"
   }
 }

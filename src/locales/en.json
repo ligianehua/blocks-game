@@ -18,10 +18,14 @@
     "music": "Music",
     "sfx": "Sound FX",
     "haptics": "Vibration",
+    "dark": "Dark mode",
+    "colorblind": "Color-blind friendly",
     "language": "Language",
+    "theme": "Theme",
     "close": "Close",
     "restart": "Restart",
     "modes": "Switch Mode",
+    "stats": "Stats",
     "tutorial": "How to play"
   },
   "mode": {
@@ -41,12 +45,36 @@
       "timeAttack": "Time · {sec}s"
     }
   },
+  "theme": {
+    "wood": "Wood",
+    "candy": "Candy",
+    "ocean": "Ocean",
+    "space": "Space",
+    "neon": "Neon",
+    "locked": "Unlock at {n}"
+  },
   "stages": {
     "title": "Stages",
     "level": "Level {n}",
     "targetScore": "Target {n} pts",
     "targetLines": "Clear {n} lines",
     "moveBudget": "in {n} moves"
+  },
+  "stats": {
+    "title": "Stats",
+    "totalGames": "Games played",
+    "byMode": "By mode",
+    "totalScore": "Total score",
+    "best": "Best score",
+    "bestCombo": "Best combo",
+    "linesCleared": "Lines cleared",
+    "placements": "Pieces placed",
+    "playTime": "Time played",
+    "stagesCleared": "Stages cleared",
+    "noData": "Nothing yet — play a round!",
+    "reset": "Reset",
+    "close": "Close",
+    "confirmReset": "Clear all stats?"
   },
   "action": {
     "undo": "Undo",
@@ -65,11 +93,12 @@
   },
   "gameover": {
     "title": "Game Over",
-    "won": "Cleared!",
+    "won": "Cleared",
     "final": "Final Score",
-    "newRecord": "New Record!",
+    "newRecord": "New Record",
     "restart": "Play Again",
-    "menu": "Menu"
+    "menu": "Menu",
+    "share": "Share"
   },
   "orientation": {
     "message": "Please rotate to portrait"
@@ -78,6 +107,6 @@
     "label": "COMBO x{n}!"
   },
   "fullClear": {
-    "label": "FULL CLEAR!"
+    "label": "FULL CLEAR"
   }
 }

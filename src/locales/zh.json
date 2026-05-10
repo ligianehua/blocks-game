@@ -5,7 +5,13 @@
   },
   "daily": {
     "title": "每日挑战",
-    "comingSoon": "即将开放"
+    "pickTitle": "选择难度",
+    "easy": "初级",
+    "normal": "中级",
+    "hard": "高级",
+    "today": "今天 {date}",
+    "best": "今日最高 {n}",
+    "noPlay": "未挑战"
   },
   "settings": {
     "title": "设置",
@@ -14,13 +20,56 @@
     "haptics": "震动",
     "language": "语言",
     "close": "关闭",
-    "restart": "重新挑战"
+    "restart": "重新挑战",
+    "modes": "切换模式",
+    "tutorial": "教学"
+  },
+  "mode": {
+    "title": "选择模式",
+    "classic": "经典模式",
+    "classicDesc": "无尽冲分",
+    "daily": "每日挑战",
+    "dailyDesc": "三档难度，全球同种子",
+    "stages": "关卡模式",
+    "stagesDesc": "12 关挑战",
+    "timeAttack": "限时模式",
+    "timeAttackDesc": "90 秒冲刺",
+    "labels": {
+      "classic": "经典",
+      "daily": "每日 · {difficulty}",
+      "stages": "关卡 {n}",
+      "timeAttack": "限时 · {sec}s"
+    }
+  },
+  "stages": {
+    "title": "关卡",
+    "level": "第 {n} 关",
+    "targetScore": "目标分数 {n}",
+    "targetLines": "消除 {n} 行",
+    "moveBudget": "{n} 步内"
+  },
+  "action": {
+    "undo": "撤销",
+    "hint": "提示",
+    "noUndo": "无可撤销",
+    "noHint": "无可提示"
+  },
+  "tutorial": {
+    "title": "新手教学",
+    "step1": "拖拽底部方块到棋盘上的任意位置。绿色 = 可放置，红色 = 不可放置。",
+    "step2": "填满整行或整列即可消除得分。",
+    "step3": "连续多回合消除可触发连击，倍率最高 3 倍！",
+    "next": "下一步",
+    "prev": "上一步",
+    "done": "开始游戏"
   },
   "gameover": {
     "title": "游戏结束",
+    "won": "通关！",
     "final": "最终分数",
     "newRecord": "破纪录！",
-    "restart": "重新开始"
+    "restart": "重新开始",
+    "menu": "菜单"
   },
   "orientation": {
     "message": "请旋转设备至竖屏"

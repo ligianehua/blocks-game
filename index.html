@@ -6,7 +6,6 @@
     <meta name="theme-color" content="#5d3a1f" />
     <meta name="description" content="A Block Blast / 1010!-style web puzzle game" />
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
-    <link rel="manifest" href="/manifest.webmanifest" />
     <title>Blocks Game</title>
   </head>
   <body>
@@ -28,6 +27,11 @@
         </button>
       </header>
 
+      <div id="mode-banner" class="mode-banner" hidden>
+        <span id="mode-banner-label"></span>
+        <span id="mode-banner-status"></span>
+      </div>
+
       <div class="progress">
         <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
         <div class="progress-marks">
@@ -36,6 +40,19 @@
       </div>
 
       <div id="board" class="board" aria-label="game board"></div>
+
+      <div class="action-bar">
+        <button id="btn-undo" class="action-btn" aria-label="undo">
+          <span class="action-icon">↶</span>
+          <span class="action-label" data-i18n="action.undo">撤销</span>
+          <span class="action-count" id="undo-count">3</span>
+        </button>
+        <button id="btn-hint" class="action-btn" aria-label="hint">
+          <span class="action-icon">💡</span>
+          <span class="action-label" data-i18n="action.hint">提示</span>
+          <span class="action-count" id="hint-count">3</span>
+        </button>
+      </div>
 
       <div id="tray" class="tray" aria-label="piece tray"></div>
 
@@ -73,6 +90,10 @@
               </select>
             </li>
           </ul>
+          <div class="settings-modes">
+            <button class="btn btn-secondary" data-action="open-mode" data-i18n="settings.modes">切换模式</button>
+            <button class="btn btn-secondary" data-action="show-tutorial" data-i18n="settings.tutorial">教学</button>
+          </div>
           <div class="modal-actions">
             <button class="btn btn-secondary" data-action="close-settings" data-i18n="settings.close">关闭</button>
             <button class="btn btn-primary" data-action="restart" data-i18n="settings.restart">重新挑战</button>
@@ -80,20 +101,100 @@
         </div>
       </div>
 
+      <div id="mode-modal" class="modal" hidden>
+        <div class="modal-card">
+          <header class="modal-header">
+            <h2 data-i18n="mode.title">选择模式</h2>
+            <button class="modal-close" data-action="close-mode" aria-label="close">×</button>
+          </header>
+          <ul class="mode-list">
+            <li><button class="btn btn-primary" data-action="start-classic">
+              <strong data-i18n="mode.classic">经典模式</strong>
+              <small data-i18n="mode.classicDesc">无尽冲分</small>
+            </button></li>
+            <li><button class="btn btn-secondary" data-action="open-daily">
+              <strong data-i18n="mode.daily">每日挑战</strong>
+              <small data-i18n="mode.dailyDesc">三档难度，全球同种子</small>
+            </button></li>
+            <li><button class="btn btn-secondary" data-action="open-stages">
+              <strong data-i18n="mode.stages">关卡模式</strong>
+              <small data-i18n="mode.stagesDesc">12 关挑战</small>
+            </button></li>
+            <li><button class="btn btn-secondary" data-action="start-time">
+              <strong data-i18n="mode.timeAttack">限时模式</strong>
+              <small data-i18n="mode.timeAttackDesc">90 秒冲刺</small>
+            </button></li>
+          </ul>
+        </div>
+      </div>
+
+      <div id="daily-modal" class="modal" hidden>
+        <div class="modal-card">
+          <header class="modal-header">
+            <h2 data-i18n="daily.pickTitle">选择难度</h2>
+            <button class="modal-close" data-action="close-daily" aria-label="close">×</button>
+          </header>
+          <div class="daily-date" id="daily-date"></div>
+          <ul class="mode-list">
+            <li><button class="btn btn-secondary" data-action="start-daily" data-difficulty="easy">
+              <strong data-i18n="daily.easy">初级</strong>
+              <small id="daily-best-easy"></small>
+            </button></li>
+            <li><button class="btn btn-secondary" data-action="start-daily" data-difficulty="normal">
+              <strong data-i18n="daily.normal">中级</strong>
+              <small id="daily-best-normal"></small>
+            </button></li>
+            <li><button class="btn btn-secondary" data-action="start-daily" data-difficulty="hard">
+              <strong data-i18n="daily.hard">高级</strong>
+              <small id="daily-best-hard"></small>
+            </button></li>
+          </ul>
+        </div>
+      </div>
+
+      <div id="stages-modal" class="modal" hidden>
+        <div class="modal-card">
+          <header class="modal-header">
+            <h2 data-i18n="stages.title">关卡</h2>
+            <button class="modal-close" data-action="close-stages" aria-label="close">×</button>
+          </header>
+          <div id="stage-grid" class="stage-grid"></div>
+        </div>
+      </div>
+
+      <div id="tutorial-modal" class="modal" hidden>
+        <div class="modal-card">
+          <header class="modal-header">
+            <h2 id="tutorial-title" data-i18n="tutorial.title">教学</h2>
+            <button class="modal-close" data-action="close-tutorial" aria-label="skip">×</button>
+          </header>
+          <div class="tutorial-body">
+            <div id="tutorial-step" class="tutorial-step"></div>
+            <div class="tutorial-dots" id="tutorial-dots"></div>
+          </div>
+          <div class="modal-actions">
+            <button class="btn btn-secondary" data-action="tutorial-prev" data-i18n="tutorial.prev">上一步</button>
+            <button class="btn btn-primary" data-action="tutorial-next" data-i18n="tutorial.next">下一步</button>
+          </div>
+        </div>
+      </div>
+
       <div id="gameover-modal" class="modal" hidden>
         <div class="modal-card">
           <header class="modal-header">
-            <h2 data-i18n="gameover.title">游戏结束</h2>
+            <h2 id="gameover-title" data-i18n="gameover.title">游戏结束</h2>
           </header>
           <div class="gameover-body">
             <div class="gameover-score">
               <div data-i18n="gameover.final">最终分数</div>
               <div id="gameover-final" class="score-current">0</div>
             </div>
+            <div id="gameover-stars" class="gameover-stars" hidden></div>
             <div id="gameover-newrecord" class="new-record" hidden data-i18n="gameover.newRecord">破纪录！</div>
           </div>
           <div class="modal-actions">
-            <button class="btn btn-secondary" data-action="restart" data-i18n="gameover.restart">重新开始</button>
+            <button class="btn btn-secondary" data-action="open-mode" data-i18n="gameover.menu">菜单</button>
+            <button class="btn btn-primary" data-action="restart" data-i18n="gameover.restart">重新开始</button>
           </div>
         </div>
       </div>

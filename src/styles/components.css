@@ -139,6 +139,72 @@
   100% { filter: brightness(1); transform: scale(1); }
 }
 
+/* ---------- Mode banner ---------- */
+.mode-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.mode-banner[hidden] { display: none; }
+.mode-banner #mode-banner-status {
+  color: var(--color-accent);
+}
+
+/* ---------- Action bar (undo/hint) ---------- */
+.action-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 0 4px;
+}
+.action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--color-text);
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  position: relative;
+}
+.action-btn:active { transform: scale(0.96); }
+.action-btn[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.action-icon { font-size: 18px; }
+.action-count {
+  background: var(--color-accent);
+  color: #5a3010;
+  font-weight: 800;
+  border-radius: 999px;
+  padding: 1px 8px;
+  font-size: 12px;
+  min-width: 22px;
+  text-align: center;
+}
+
+/* ---------- Hint highlight ---------- */
+.cell.hint {
+  animation: hint-pulse 1.6s ease-in-out 3;
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+@keyframes hint-pulse {
+  0%, 100% { background: rgba(255, 213, 74, 0.2); }
+  50% { background: rgba(255, 213, 74, 0.6); }
+}
+
 /* ---------- Tray ---------- */
 .tray {
   display: grid;
@@ -284,6 +350,121 @@
 .btn:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25); }
 .btn-primary { background: linear-gradient(180deg, #6dd47e, #41a55a); }
 .btn-secondary { background: linear-gradient(180deg, #6cc8e0, #2f95b6); }
+
+/* ---------- Settings extra block ---------- */
+.settings-modes {
+  padding: 0 20px 16px;
+  background: #fff7e8;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* ---------- Mode list ---------- */
+.mode-list {
+  list-style: none;
+  margin: 0;
+  padding: 16px 20px;
+  background: #fff7e8;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.mode-list .btn {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  text-align: left;
+  padding: 12px 16px;
+}
+.mode-list .btn strong { font-size: 17px; }
+.mode-list .btn small { font-size: 12px; opacity: 0.8; font-weight: 500; }
+
+.daily-date {
+  background: #fff7e8;
+  color: #6a4022;
+  text-align: center;
+  padding: 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ---------- Stage grid ---------- */
+.stage-grid {
+  background: #fff7e8;
+  padding: 16px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+.stage-cell {
+  aspect-ratio: 1 / 1;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #6dd47e, #41a55a);
+  border: none;
+  color: #fff;
+  font-weight: 800;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.2);
+}
+.stage-cell.locked {
+  background: linear-gradient(180deg, #c8b9a6, #a39482);
+  cursor: not-allowed;
+}
+.stage-cell.completed {
+  background: linear-gradient(180deg, #ffc66e, #f08f1f);
+}
+.stage-stars {
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: #ffe07a;
+}
+.stage-cell.locked .stage-stars { color: #efe3d3; }
+
+/* ---------- Tutorial ---------- */
+.tutorial-body {
+  background: #fff7e8;
+  color: #6a4022;
+  padding: 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.tutorial-step {
+  font-size: 16px;
+  line-height: 1.5;
+}
+.tutorial-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+.tutorial-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #d8c2a7;
+}
+.tutorial-dots span.active {
+  background: var(--color-accent);
+}
+
+.gameover-stars {
+  margin-top: 12px;
+  font-size: 32px;
+  letter-spacing: 4px;
+  color: #ffc66e;
+}
+.gameover-stars[hidden] { display: none; }
 
 .gameover-body {
   padding: 24px 20px;

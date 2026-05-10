@@ -5,7 +5,13 @@
   },
   "daily": {
     "title": "Daily",
-    "comingSoon": "Coming soon"
+    "pickTitle": "Choose Difficulty",
+    "easy": "Easy",
+    "normal": "Normal",
+    "hard": "Hard",
+    "today": "Today {date}",
+    "best": "Today best {n}",
+    "noPlay": "Not played"
   },
   "settings": {
     "title": "Settings",
@@ -14,13 +20,56 @@
     "haptics": "Vibration",
     "language": "Language",
     "close": "Close",
-    "restart": "Restart"
+    "restart": "Restart",
+    "modes": "Switch Mode",
+    "tutorial": "How to play"
+  },
+  "mode": {
+    "title": "Choose Mode",
+    "classic": "Classic",
+    "classicDesc": "Endless score chase",
+    "daily": "Daily Challenge",
+    "dailyDesc": "Same seed worldwide, 3 levels",
+    "stages": "Stages",
+    "stagesDesc": "12 hand-crafted levels",
+    "timeAttack": "Time Attack",
+    "timeAttackDesc": "90-second sprint",
+    "labels": {
+      "classic": "Classic",
+      "daily": "Daily · {difficulty}",
+      "stages": "Stage {n}",
+      "timeAttack": "Time · {sec}s"
+    }
+  },
+  "stages": {
+    "title": "Stages",
+    "level": "Level {n}",
+    "targetScore": "Target {n} pts",
+    "targetLines": "Clear {n} lines",
+    "moveBudget": "in {n} moves"
+  },
+  "action": {
+    "undo": "Undo",
+    "hint": "Hint",
+    "noUndo": "No undo left",
+    "noHint": "No hint available"
+  },
+  "tutorial": {
+    "title": "How to Play",
+    "step1": "Drag a piece from the tray onto the board. Green = valid, red = blocked.",
+    "step2": "Fill an entire row or column to clear it and score points.",
+    "step3": "Chain consecutive clears for combo bonuses up to 3x!",
+    "next": "Next",
+    "prev": "Back",
+    "done": "Play"
   },
   "gameover": {
     "title": "Game Over",
+    "won": "Cleared!",
     "final": "Final Score",
     "newRecord": "New Record!",
-    "restart": "Play Again"
+    "restart": "Play Again",
+    "menu": "Menu"
   },
   "orientation": {
     "message": "Please rotate to portrait"

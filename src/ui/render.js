@@ -125,6 +125,21 @@ export function getSlotEl(idx) {
   return slotEls[idx];
 }
 
+export function showHint(piece, anchorR, anchorC) {
+  clearHint();
+  for (const [dr, dc] of piece.cells) {
+    const r = anchorR + dr;
+    const c = anchorC + dc;
+    if (r < 0 || r >= BOARD_SIZE || c < 0 || c >= BOARD_SIZE) continue;
+    cellEls[r * BOARD_SIZE + c].classList.add('hint');
+  }
+  setTimeout(clearHint, 5000);
+}
+
+export function clearHint() {
+  for (const el of cellEls) el.classList.remove('hint');
+}
+
 export function flashLines(rows, cols) {
   for (const r of rows) {
     for (let c = 0; c < BOARD_SIZE; c++) {

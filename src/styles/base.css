@@ -9,6 +9,18 @@
 
   --safe-top: env(safe-area-inset-top, 0);
   --safe-bottom: env(safe-area-inset-bottom, 0);
+
+  /* Approximate non-board chrome height: header + progress + action bar +
+     tray + paddings + gaps. Used to cap the board so it never overflows
+     vertically on short displays. Override via media queries below. */
+  --chrome-h: 400px;
+}
+
+@media (max-height: 720px) {
+  :root { --chrome-h: 340px; }
+}
+@media (max-height: 580px) {
+  :root { --chrome-h: 300px; }
 }
 
 * {
@@ -26,6 +38,7 @@ body {
   width: 100%;
   height: 100%;
   overflow: hidden;
+  overscroll-behavior: none;
   font-family: var(--font-stack);
   color: var(--color-text);
   background:
@@ -33,6 +46,10 @@ body {
     linear-gradient(180deg, var(--color-bg-1), var(--color-bg-2));
   background-attachment: fixed;
   touch-action: manipulation;
+}
+
+@supports (height: 100dvh) {
+  html, body { height: 100dvh; }
 }
 
 body::before {
@@ -60,6 +77,15 @@ body::before {
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding: calc(var(--safe-top) + 16px) 16px calc(var(--safe-bottom) + 16px);
-  gap: 12px;
+  padding: calc(var(--safe-top) + 12px) 12px calc(var(--safe-bottom) + 12px);
+  gap: 10px;
+  overflow: hidden;
+}
+
+@supports (height: 100dvh) {
+  #app { height: 100dvh; }
+}
+
+@media (max-height: 720px) {
+  #app { gap: 8px; padding-top: calc(var(--safe-top) + 8px); padding-bottom: calc(var(--safe-bottom) + 8px); }
 }

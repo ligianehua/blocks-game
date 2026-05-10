@@ -87,11 +87,12 @@
 /* ---------- Board ---------- */
 .board {
   --cell-gap: 2px;
-  flex: 1 1 auto;
-  width: min(92vw, 480px);
+  flex: 0 1 auto;
+  width: min(92vw, calc(100dvh - var(--chrome-h)), 480px);
   align-self: center;
   max-width: 100%;
   aspect-ratio: 1 / 1;
+  touch-action: none;
   display: grid;
   grid-template-columns: repeat(var(--board-size), 1fr);
   grid-template-rows: repeat(var(--board-size), 1fr);
@@ -102,6 +103,10 @@
   box-shadow:
     inset 0 4px 8px rgba(0, 0, 0, 0.5),
     0 4px 0 rgba(0, 0, 0, 0.25);
+}
+
+@supports not (height: 100dvh) {
+  .board { width: min(92vw, calc(100vh - var(--chrome-h)), 480px); }
 }
 
 .cell {
@@ -213,6 +218,24 @@
   padding: 0 4px;
   min-height: 110px;
   align-items: center;
+  flex: 0 0 auto;
+}
+
+@media (max-height: 720px) {
+  .tray { min-height: 88px; gap: 8px; }
+  .piece { --tray-cell: 18px; }
+  .score-current { font-size: 28px; }
+  .icon-btn { width: 38px; height: 38px; }
+  .action-bar { gap: 8px; }
+  .action-btn { padding: 6px 10px; font-size: 13px; }
+  .progress-bar { height: 10px; }
+}
+@media (max-height: 580px) {
+  .tray { min-height: 72px; }
+  .piece { --tray-cell: 14px; }
+  .score-current { font-size: 22px; }
+  .progress-bar { display: none; }
+  .progress-marks { display: none; }
 }
 
 .tray-slot {

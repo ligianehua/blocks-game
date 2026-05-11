@@ -22,3 +22,15 @@ export function rankFor(board, mode, score) {
   }
   return rank;
 }
+
+export function qualifies(board, mode, score) {
+  if (score <= 0) return false;
+  const entries = board?.[mode] ?? [];
+  if (entries.length < KEEP) return true;
+  return score > entries[entries.length - 1].score;
+}
+
+export function sanitizeName(name) {
+  const s = String(name ?? '').trim().slice(0, 12);
+  return s.length === 0 ? null : s;
+}

@@ -4,7 +4,7 @@ const LINE_BASE = 10;
 const CROSS_BONUS = 50;
 const FULL_CLEAR_BONUS = 300;
 
-const COMBO_MULTIPLIER = [1, 1, 1.2, 1.5, 2, 3];
+const COMBO_MULTIPLIER = [1, 1, 1.5, 2, 3, 4, 5];
 
 function multiLineMultiplier(lineCount) {
   if (lineCount <= 1) return 1;

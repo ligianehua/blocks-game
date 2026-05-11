@@ -144,6 +144,50 @@
   100% { filter: brightness(1); transform: scale(1); }
 }
 
+/* ---------- Particle FX ---------- */
+.fx-root {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 850;
+  overflow: hidden;
+}
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.7);
+  animation: particle-fly 720ms ease-out forwards;
+  will-change: transform, opacity;
+}
+@keyframes particle-fly {
+  0% {
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform:
+      translate(calc(-50% + var(--dx)), calc(-50% + var(--dy) + 30px))
+      scale(0.2)
+      rotate(var(--rot));
+    opacity: 0;
+  }
+}
+.shockwave {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border: 3px solid;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: shockwave-expand 520ms ease-out forwards;
+  will-change: width, height, opacity;
+}
+@keyframes shockwave-expand {
+  0% { width: 0; height: 0; opacity: 0.8; border-width: 3px; }
+  100% { width: 220px; height: 220px; opacity: 0; border-width: 1px; }
+}
+
 /* ---------- Mode banner ---------- */
 .mode-banner {
   display: flex;
@@ -768,6 +812,61 @@
   padding: 16px;
 }
 
+/* ---------- Leaderboard entry modal ---------- */
+.lb-entry-body {
+  background: #fff7e8;
+  color: #6a4022;
+  padding: 24px 20px 18px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.lb-entry-rank {
+  font-size: 32px;
+  font-weight: 900;
+  color: #d97a2f;
+}
+.lb-entry-score {
+  font-size: 56px;
+  font-weight: 900;
+  color: #ff9000;
+  line-height: 1;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.15);
+}
+.lb-entry-hint {
+  font-size: 14px;
+  opacity: 0.8;
+}
+#lb-entry-name,
+#input-player-name {
+  border: 1px solid #c69466;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 16px;
+  text-align: center;
+  background: #fff;
+  color: #6a4022;
+  width: 180px;
+  align-self: center;
+}
+#input-player-name {
+  width: 140px;
+  font-size: 14px;
+  text-align: left;
+}
+
+/* Highlight name in leaderboard table */
+.lb-table td.lb-name {
+  font-weight: 700;
+  color: #6a4022;
+  text-align: left;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* ---------- Toast ---------- */
 .toast-root {
   position: fixed;
@@ -889,20 +988,34 @@
   20% { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
   100% { opacity: 0; transform: translate(-50%, -180%) scale(1); }
 }
-.combo-bubble {
+.combo-badge {
   position: absolute;
-  font-size: 28px;
+  font-family: var(--font-stack);
   font-weight: 900;
+  font-size: 96px;
+  line-height: 1;
+  letter-spacing: -4px;
   color: #fff;
-  text-shadow: 0 2px 0 #cc4400, 0 0 10px rgba(0, 0, 0, 0.6);
+  text-shadow:
+    0 6px 0 rgba(0, 0, 0, 0.35),
+    0 0 24px rgba(255, 213, 74, 0.9),
+    0 0 60px rgba(255, 140, 0, 0.6);
   transform: translate(-50%, -50%);
-  animation: combo-pop 1.2s ease forwards;
+  animation: combo-pop 1.4s cubic-bezier(.18,1.25,.42,1) forwards;
+  will-change: transform, opacity;
 }
+.combo-badge.tier-1 { color: #fff5e1; }
+.combo-badge.tier-2 { color: #ffd54a; font-size: 110px; }
+.combo-badge.tier-3 { color: #ff8a3c; font-size: 124px; }
+.combo-badge.tier-4 { color: #ff5cb0; font-size: 138px; }
+.combo-badge.tier-5 { color: #ff2e88; font-size: 152px; }
+
 @keyframes combo-pop {
-  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.4); }
-  30% { opacity: 1; transform: translate(-50%, -50%) scale(1.3); }
-  60% { transform: translate(-50%, -60%) scale(1); }
-  100% { opacity: 0; transform: translate(-50%, -120%) scale(1); }
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.3) rotate(-12deg); }
+  18% { opacity: 1; transform: translate(-50%, -50%) scale(1.5) rotate(8deg); }
+  35% { transform: translate(-50%, -50%) scale(1.05) rotate(-3deg); }
+  55% { transform: translate(-50%, -55%) scale(1) rotate(0deg); }
+  100% { opacity: 0; transform: translate(-50%, -120%) scale(0.9); }
 }
 .fullclear-banner {
   position: absolute;

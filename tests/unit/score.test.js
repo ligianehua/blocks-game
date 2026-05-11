@@ -45,9 +45,16 @@ describe('clearScore', () => {
     expect(r.gained).toBe(80 + 300);
   });
 
-  it('combo 3 applies 1.5x', () => {
+  it('combo 3 applies 2x (boosted)', () => {
     const r = clearScore({ rows: [3], cols: [] }, 3, false);
-    expect(r.gained).toBe(Math.round(80 * 1.5));
+    expect(r.gained).toBe(80 * 2);
+  });
+
+  it('combo 5+ caps multipliers at 4x then 5x', () => {
+    const r4 = clearScore({ rows: [3], cols: [] }, 5, false);
+    expect(r4.gained).toBe(80 * 4);
+    const r5 = clearScore({ rows: [3], cols: [] }, 10, false);
+    expect(r5.gained).toBe(80 * 5);
   });
 });
 

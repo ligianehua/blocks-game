@@ -12,7 +12,13 @@ import { nextMilestone, progressToNext } from './game/score.js';
 import { emptyStats, recordGameOver, formatDuration } from './game/stats.js';
 import { ACHIEVEMENTS, evaluate as evalAchievements, getById as getAchievement } from './game/achievements.js';
 import { emptyCheckin, checkInToday, computeReward, dayKey } from './game/checkin.js';
-import { emptyBoard as emptyLb, recordScore as recordLbScore } from './game/leaderboard.js';
+import {
+  emptyBoard as emptyLb,
+  recordScore as recordLbScore,
+  rankFor,
+  qualifies as lbQualifies,
+  sanitizeName,
+} from './game/leaderboard.js';
 import {
   initBoard,
   initTray,
@@ -25,6 +31,7 @@ import {
 import { attachTrayDrag } from './ui/drag.js';
 import { openModal, closeModal, isOpen } from './ui/modal.js';
 import { scorePopup, comboBubble, fullClearBanner } from './ui/animations.js';
+import { burst, shockwave } from './ui/particles.js';
 import * as tutorial from './ui/tutorial.js';
 import {
   THEMES,
@@ -58,6 +65,7 @@ const KEYS = {
   achievements: 'bg.achievements',
   checkin: 'bg.checkin',
   leaderboard: 'bg.leaderboard',
+  playerName: 'bg.playerName',
 };
 
 let game = null;
@@ -87,6 +95,8 @@ let settings = {
 };
 
 let lastResult = null;
+let playerName = null;
+let pendingLbEntry = null;
 
 function loadSettings() {
   const stored = storage.get(KEYS.settings, {});
@@ -121,6 +131,16 @@ function loadLeaderboard() {
 }
 function saveLeaderboard() {
   storage.set(KEYS.leaderboard, leaderboard);
+}
+
+function loadPlayerName() {
+  playerName = storage.get(KEYS.playerName, null);
+}
+function savePlayerName(name) {
+  const clean = sanitizeName(name);
+  playerName = clean;
+  if (clean === null) storage.remove(KEYS.playerName);
+  else storage.set(KEYS.playerName, clean);
 }
 
 function buildWorld() {
@@ -381,6 +401,7 @@ function syncSettingsToUi() {
   document.getElementById('toggle-colorblind').checked = !!settings.colorblind;
   document.getElementById('select-language').value = i18n.getLocale();
   document.getElementById('select-shape').value = settings.shape ?? 'rounded';
+  document.getElementById('input-player-name').value = playerName ?? '';
   renderThemePicker();
 }
 
@@ -551,8 +572,13 @@ function showGameOver({ score, won }) {
     dateStr: new Date().toLocaleDateString(),
   };
 
-  leaderboard = recordLbScore(leaderboard, mode, score, { mode, won });
-  saveLeaderboard();
+  const onLeaderboard = score > 0 && lbQualifies(leaderboard, mode, score);
+  if (onLeaderboard) {
+    pendingLbEntry = { score, won, mode };
+    showLbEntryModal(score, mode);
+  } else {
+    commitLbEntry(playerName);
+  }
 
   evaluateAchievements();
 
@@ -582,6 +608,40 @@ async function handleRevive() {
   }
   closeModal('gameover-modal');
   refreshAll();
+}
+
+function showLbEntryModal(score, mode) {
+  const rank = rankFor(leaderboard, mode, score);
+  document.getElementById('lb-entry-rank').textContent = `#${rank}`;
+  document.getElementById('lb-entry-score').textContent = score;
+  const input = document.getElementById('lb-entry-name');
+  input.value = playerName ?? '';
+  openModal('lb-entry-modal');
+  setTimeout(() => input.focus(), 80);
+}
+
+function commitLbEntry(name) {
+  if (!pendingLbEntry) {
+    if (lastResult) {
+      leaderboard = recordLbScore(leaderboard, lastResult.mode, lastResult.score, {
+        mode: lastResult.mode,
+        won: lastResult.won,
+        name: sanitizeName(name) ?? sanitizeName(playerName) ?? null,
+      });
+      saveLeaderboard();
+    }
+    return;
+  }
+  const { score, won, mode: m } = pendingLbEntry;
+  const clean = sanitizeName(name);
+  if (clean) savePlayerName(clean);
+  leaderboard = recordLbScore(leaderboard, m, score, {
+    mode: m,
+    won,
+    name: clean ?? null,
+  });
+  saveLeaderboard();
+  pendingLbEntry = null;
 }
 
 function modeLabel() {
@@ -698,7 +758,7 @@ function renderLeaderboardModal() {
   const table = document.createElement('table');
   table.className = 'lb-table';
   const head = document.createElement('tr');
-  for (const key of ['rank', 'score', 'date']) {
+  for (const key of ['rank', 'name', 'score', 'date']) {
     const th = document.createElement('th');
     th.textContent = i18n.t(`lb.${key}`);
     if (key === 'score') th.style.textAlign = 'right';
@@ -710,12 +770,16 @@ function renderLeaderboardModal() {
     const r = document.createElement('td');
     r.className = 'lb-rank';
     r.textContent = i + 1;
+    const n = document.createElement('td');
+    n.className = 'lb-name';
+    n.textContent = e.name ?? i18n.t('lb.anonymous');
     const s = document.createElement('td');
     s.className = 'lb-score';
     s.textContent = e.score;
     const d = document.createElement('td');
     d.textContent = new Date(e.ts).toLocaleDateString();
     tr.appendChild(r);
+    tr.appendChild(n);
     tr.appendChild(s);
     tr.appendChild(d);
     table.appendChild(tr);
@@ -815,6 +879,9 @@ function bindUi() {
     settings.shape = e.target.value;
     applyShape(settings.shape);
     saveSettings();
+  });
+  document.getElementById('input-player-name').addEventListener('change', (e) => {
+    savePlayerName(e.target.value);
   });
 
   document.body.addEventListener('click', (e) => {
@@ -936,6 +1003,16 @@ function bindUi() {
       case 'revive':
         handleRevive();
         break;
+      case 'lb-entry-save': {
+        const name = document.getElementById('lb-entry-name').value;
+        commitLbEntry(name);
+        closeModal('lb-entry-modal');
+        break;
+      }
+      case 'lb-entry-skip':
+        commitLbEntry(null);
+        closeModal('lb-entry-modal');
+        break;
       default: break;
     }
   });
@@ -954,13 +1031,14 @@ function bindGameEvents() {
     if (emptyAfter) everFullClear = true;
     if (game?.isReplaying) return;
     flashLines(rows, cols);
+    spawnExplosions(rows, cols, combo);
     audio.play(combo >= 2 ? 'combo' : 'clear');
     haptics.vibrate(combo >= 2 ? haptics.PATTERNS.combo : haptics.PATTERNS.clear);
     const board = document.getElementById('board');
     const rect = board.getBoundingClientRect();
     const popupAt = popupPositionFor(rect, rows, cols);
     scorePopup(`+${gained}`, popupAt.x, popupAt.y, 'clear');
-    if (combo >= 2) comboBubble(combo, board);
+    comboBubble(combo, board);
     if (emptyAfter) fullClearBanner(board);
     analytics.track('lines_cleared', { mode, rows: rows.length, cols: cols.length, combo, gained });
     evaluateAchievements();
@@ -977,6 +1055,49 @@ function bindGameEvents() {
     if (game?.isReplaying) return;
     showGameOver(payload);
   });
+}
+
+function readThemeVar(name, fallback) {
+  const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return v || fallback;
+}
+
+function spawnExplosions(rows, cols, combo) {
+  const board = document.getElementById('board');
+  if (!board) return;
+  const rect = board.getBoundingClientRect();
+  const cellSize = rect.width / 8;
+  const palette = [
+    readThemeVar('--tier-1', '#6fd6c0'),
+    readThemeVar('--tier-2', '#95d97a'),
+    readThemeVar('--tier-3', '#4fb89c'),
+    readThemeVar('--color-accent', '#ffd54a'),
+  ];
+  const cells = new Set();
+  for (const r of rows) {
+    for (let c = 0; c < 8; c++) cells.add(`${r},${c}`);
+  }
+  for (const c of cols) {
+    for (let r = 0; r < 8; r++) cells.add(`${r},${c}`);
+  }
+  let i = 0;
+  for (const key of cells) {
+    const [r, c] = key.split(',').map(Number);
+    const color = palette[(r + c) % palette.length];
+    const x = rect.left + (c + 0.5) * cellSize;
+    const y = rect.top + (r + 0.5) * cellSize;
+    setTimeout(() => burst(x, y, {
+      count: 6 + Math.min(combo, 4),
+      color,
+      size: 8 + Math.min(combo, 3) * 2,
+    }), i * 12);
+    i++;
+  }
+  if (rows.length + cols.length >= 2 || combo >= 2) {
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    shockwave(cx, cy, readThemeVar('--color-accent', '#ffd54a'));
+  }
 }
 
 function popupPositionFor(boardRect, rows, cols) {
@@ -1028,6 +1149,7 @@ function bootstrap() {
   loadAchievements();
   loadCheckin();
   loadLeaderboard();
+  loadPlayerName();
   i18n.init(settings.language);
   initBoard(document.getElementById('board'));
   initTray(document.getElementById('tray'));

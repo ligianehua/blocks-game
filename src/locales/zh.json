@@ -21,6 +21,7 @@
     "dark": "暗色模式",
     "colorblind": "色弱友好",
     "language": "语言",
+    "playerName": "玩家名称",
     "theme": "主题",
     "shape": "方块形状",
     "close": "关闭",
@@ -119,8 +120,16 @@
     "title": "排行榜",
     "empty": "暂无记录",
     "rank": "#",
+    "name": "名字",
     "score": "分数",
-    "date": "日期"
+    "date": "日期",
+    "anonymous": "匿名"
+  },
+  "lbEntry": {
+    "title": "登上排行榜",
+    "prompt": "输入你的名字或代号",
+    "save": "保存",
+    "skip": "跳过"
   },
   "action": {
     "undo": "撤销",

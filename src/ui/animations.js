@@ -22,12 +22,12 @@ export function scorePopup(text, x, y, variant = 'default') {
 }
 
 export function comboBubble(combo, anchorEl) {
-  if (combo < 2) return;
+  if (combo < 1) return;
   const root = ensureRoot();
   const rect = anchorEl?.getBoundingClientRect();
   const el = document.createElement('div');
-  el.className = 'combo-bubble';
-  el.textContent = t('combo.label', { n: combo });
+  el.className = `combo-badge tier-${Math.min(combo, 5)}`;
+  el.textContent = `x${combo}`;
   if (rect) {
     el.style.left = `${rect.left + rect.width / 2}px`;
     el.style.top = `${rect.top + rect.height / 2}px`;
@@ -36,7 +36,7 @@ export function comboBubble(combo, anchorEl) {
     el.style.top = '40%';
   }
   root.appendChild(el);
-  setTimeout(() => el.remove(), 1200);
+  setTimeout(() => el.remove(), 1400);
 }
 
 export function fullClearBanner(anchorEl) {

@@ -98,6 +98,10 @@
               </select>
             </li>
             <li>
+              <span data-i18n="settings.playerName">玩家名称</span>
+              <input id="input-player-name" type="text" maxlength="12" autocomplete="off" />
+            </li>
+            <li>
               <span data-i18n="settings.shape">方块形状</span>
               <select id="select-shape">
                 <option value="rounded" data-i18n="shape.rounded">圆角</option>
@@ -254,6 +258,24 @@
           </header>
           <div class="lb-tabs" id="lb-tabs"></div>
           <div id="lb-body" class="lb-body"></div>
+        </div>
+      </div>
+
+      <div id="lb-entry-modal" class="modal" hidden>
+        <div class="modal-card">
+          <header class="modal-header">
+            <h2 data-i18n="lbEntry.title">登上排行榜</h2>
+          </header>
+          <div class="lb-entry-body">
+            <div class="lb-entry-rank" id="lb-entry-rank">#1</div>
+            <div class="lb-entry-score" id="lb-entry-score">0</div>
+            <div class="lb-entry-hint" data-i18n="lbEntry.prompt">输入你的名字</div>
+            <input id="lb-entry-name" type="text" maxlength="12" autocomplete="off" />
+          </div>
+          <div class="modal-actions">
+            <button class="btn btn-secondary" data-action="lb-entry-skip" data-i18n="lbEntry.skip">跳过</button>
+            <button class="btn btn-primary" data-action="lb-entry-save" data-i18n="lbEntry.save">保存</button>
+          </div>
         </div>
       </div>
 

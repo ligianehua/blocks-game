@@ -21,6 +21,7 @@
     "dark": "Dark mode",
     "colorblind": "Color-blind friendly",
     "language": "Language",
+    "playerName": "Player name",
     "theme": "Theme",
     "shape": "Block shape",
     "close": "Close",
@@ -119,8 +120,16 @@
     "title": "Leaderboard",
     "empty": "No records yet",
     "rank": "#",
+    "name": "Name",
     "score": "Score",
-    "date": "Date"
+    "date": "Date",
+    "anonymous": "Anon"
+  },
+  "lbEntry": {
+    "title": "You made the board!",
+    "prompt": "Enter your name or alias",
+    "save": "Save",
+    "skip": "Skip"
   },
   "action": {
     "undo": "Undo",
